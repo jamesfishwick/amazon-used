@@ -1,0 +1,20 @@
+
+═══════════════════════════════════════════════════════════════════════
+Price: $19.00 (Item: $19.00, Shipping: $0.00)
+Condition: New
+Type: New
+Source: All Offers Page
+Context (first 500 chars):
+
+                                                                                                                                                                                   
+		/* Temporary CSS overrides for savings. Sim: https://sim.amazon.com/issues/DPOffersDev-11797 */
+		.centralizedApexPriceSavingsOverrides {
+			color: #CC0C39!important;
+			font-weight: 300!important;
+		}
+	
+	   
+				.centralizedApexPriceSavingsPercentageMargin,
+				.centralizedApexPricePriceToPayMargin {
+					margin-ri
+═══════════════════════════════════════════════════════════════════════

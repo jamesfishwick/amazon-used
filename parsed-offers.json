@@ -1,0 +1,132 @@
+[
+  {
+    "itemPrice": null,
+    "shippingCost": 0,
+    "totalPrice": null,
+    "shippingText": "FREE",
+    "condition": "New",
+    "seller": "Amazon",
+    "containerId": "aod-sticky-pinned-offer",
+    "index": 0
+  },
+  {
+    "itemPrice": null,
+    "shippingCost": 0,
+    "totalPrice": null,
+    "shippingText": "Unknown",
+    "condition": "Unknown",
+    "seller": "Unknown",
+    "containerId": "pinned-offer-scroll-id",
+    "index": 4
+  },
+  {
+    "itemPrice": null,
+    "shippingCost": 0,
+    "totalPrice": null,
+    "shippingText": "FREE",
+    "condition": "New",
+    "seller": "Amazon",
+    "containerId": "aod-pinned-offer",
+    "index": 11
+  },
+  {
+    "itemPrice": null,
+    "shippingCost": 0,
+    "totalPrice": null,
+    "shippingText": "FREE",
+    "condition": "Unknown",
+    "seller": "Unknown",
+    "containerId": "pinned-offer-top-id",
+    "index": 12
+  },
+  {
+    "itemPrice": null,
+    "shippingCost": 0,
+    "totalPrice": null,
+    "shippingText": "Unknown",
+    "condition": "New",
+    "seller": "---SuperBookDeals Seller rating is 4",
+    "containerId": "aod-offer",
+    "index": 17
+  },
+  {
+    "itemPrice": null,
+    "shippingCost": 0,
+    "totalPrice": null,
+    "shippingText": "FREE",
+    "condition": "New",
+    "seller": "webdelicollc Seller rating is 3",
+    "containerId": "aod-offer",
+    "index": 18
+  },
+  {
+    "itemPrice": null,
+    "shippingCost": 0,
+    "totalPrice": null,
+    "shippingText": "FREE",
+    "condition": "New",
+    "seller": "MyPrepbooks Seller rating is 4",
+    "containerId": "aod-offer",
+    "index": 19
+  },
+  {
+    "itemPrice": null,
+    "shippingCost": 0,
+    "totalPrice": null,
+    "shippingText": "Unknown",
+    "condition": "New",
+    "seller": "RAREWAVES-IMPORTS Seller rating is 4",
+    "containerId": "aod-offer",
+    "index": 20
+  },
+  {
+    "itemPrice": null,
+    "shippingCost": 0,
+    "totalPrice": null,
+    "shippingText": "FREE",
+    "condition": "New",
+    "seller": "betterdeals2019 Seller rating is 4 out of 5 stars ",
+    "containerId": "aod-offer",
+    "index": 21
+  },
+  {
+    "itemPrice": null,
+    "shippingCost": 0,
+    "totalPrice": null,
+    "shippingText": "Unknown",
+    "condition": "New",
+    "seller": "All-Time-Fast Seller rating is 4 out of 5 stars (1",
+    "containerId": "aod-offer",
+    "index": 22
+  },
+  {
+    "itemPrice": null,
+    "shippingCost": 0,
+    "totalPrice": null,
+    "shippingText": "Unknown",
+    "condition": "Used \n                    - Like",
+    "seller": "---SuperBookDeals Seller rating is 4",
+    "containerId": "aod-offer",
+    "index": 23
+  },
+  {
+    "itemPrice": null,
+    "shippingCost": 0,
+    "totalPrice": null,
+    "shippingText": "FREE",
+    "condition": "Used \n                    - Good",
+    "seller": "LuminaryBooks Seller rating is 5 out of 5 stars (1",
+    "containerId": "aod-offer",
+    "index": 24
+  },
+  {
+    "itemPrice": null,
+    "shippingCost": 0,
+    "totalPrice": null,
+    "shippingText": "FREE",
+    "condition": "New",
+    "seller": "LuminaryBooks Seller rating is 5 out of 5 stars (1",
+    "containerId": "aod-offer",
+    "index": 25
+  }
+]

@@ -1,0 +1,98 @@
+[
+  {
+    "itemPrice": 15.99,
+    "shippingCost": 3.99,
+    "totalPrice": 19.98,
+    "shippingText": "$3.99",
+    "condition": "new",
+    "seller": "Unknown"
+  },
+  {
+    "itemPrice": 19.99,
+    "shippingCost": 0,
+    "totalPrice": 19.99,
+    "shippingText": "Unknown",
+    "condition": "Unknown",
+    "seller": "Unknown"
+  },
+  {
+    "itemPrice": 19.99,
+    "shippingCost": 0,
+    "totalPrice": 19.99,
+    "shippingText": "FREE",
+    "condition": "Unknown",
+    "seller": "Unknown"
+  },
+  {
+    "itemPrice": 22.11,
+    "shippingCost": 0,
+    "totalPrice": 22.11,
+    "shippingText": "FREE",
+    "condition": "Unknown",
+    "seller": "Unknown"
+  },
+  {
+    "itemPrice": 23.94,
+    "shippingCost": 0,
+    "totalPrice": 23.94,
+    "shippingText": "FREE",
+    "condition": "Unknown",
+    "seller": "Unknown"
+  },
+  {
+    "itemPrice": 19.99,
+    "shippingCost": 3.99,
+    "totalPrice": 23.979999999999997,
+    "shippingText": "$3.99",
+    "condition": "new",
+    "seller": "Unknown"
+  },
+  {
+    "itemPrice": 23.27,
+    "shippingCost": 3.99,
+    "totalPrice": 27.259999999999998,
+    "shippingText": "$3.99",
+    "condition": "Unknown",
+    "seller": "Unknown"
+  },
+  {
+    "itemPrice": 27.27,
+    "shippingCost": 0,
+    "totalPrice": 27.27,
+    "shippingText": "FREE",
+    "condition": "Unknown",
+    "seller": "Unknown"
+  },
+  {
+    "itemPrice": 27.11,
+    "shippingCost": 0.44,
+    "totalPrice": 27.55,
+    "shippingText": "$0.44",
+    "condition": "Unknown",
+    "seller": "Unknown"
+  },
+  {
+    "itemPrice": 30.06,
+    "shippingCost": 3.99,
+    "totalPrice": 34.05,
+    "shippingText": "$3.99",
+    "condition": "Unknown",
+    "seller": "Unknown"
+  },
+  {
+    "itemPrice": 34.06,
+    "shippingCost": 0,
+    "totalPrice": 34.06,
+    "shippingText": "FREE",
+    "condition": "Unknown",
+    "seller": "Unknown"
+  },
+  {
+    "itemPrice": 34.06,
+    "shippingCost": 0,
+    "totalPrice": 34.06,
+    "shippingText": "FREE",
+    "condition": "Unknown",
+    "seller": "Unknown"
+  }
+]
