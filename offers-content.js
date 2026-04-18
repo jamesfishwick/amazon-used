@@ -1,250 +1,298 @@
-// Offers page content script - runs on offer listing pages to extract real prices
-// This script waits for the all-offers-display div to populate and extracts real offers
+// Offers page content script - runs on offer listing pages to extract real offers
+// Anchors on the AOD offer containers so seller/condition/shipping come from
+// stable sub-components (#aod-offer-heading, #aod-offer-soldBy) rather than
+// regexing noisy container text.
 
 (function() {
   'use strict';
-  
+
   const DEBUG_MODE = true;
-  
-  // Books-only filter: include physical book offers, exclude digital formats.
-  function shouldIncludePrice(priceText, contextText) {
-    const lowerContext = contextText.toLowerCase();
-    const isDigital = lowerContext.includes('kindle') ||
-                     lowerContext.includes('ebook') ||
-                     lowerContext.includes('audiobook') ||
-                     lowerContext.includes('audible');
-    return !isDigital;
+
+  // Books-only filter: exclude digital formats detectable from container text.
+  function isDigitalContext(text) {
+    const lower = (text || '').toLowerCase();
+    return lower.includes('kindle') ||
+           lower.includes('ebook') ||
+           lower.includes('audiobook') ||
+           lower.includes('audible');
   }
-  
+
   async function waitForOffersToLoad() {
     if (DEBUG_MODE) {
-      console.log('🔍 OFFERS CONTENT SCRIPT: Waiting for all-offers-display to populate...');
+      console.log('OFFERS CONTENT SCRIPT: waiting for offers to render');
     }
-    
+
     return new Promise((resolve) => {
+      const start = Date.now();
+
       const checkDiv = () => {
-        const div = document.getElementById('all-offers-display');
-        
+        // Real Amazon product page wraps the list in #all-offers-display.
+        // The raw aodAjaxMain endpoint exposes #aod-offer-list directly.
+        const div = document.getElementById('all-offers-display') ||
+                    document.getElementById('aod-container') ||
+                    (document.getElementById('aod-offer-list') || {}).parentElement ||
+                    null;
+
         if (!div) {
-          if (DEBUG_MODE) console.log('⏳ all-offers-display div not found, waiting...');
-          setTimeout(checkDiv, 1000);
+          if (Date.now() - start > 20000) {
+            if (DEBUG_MODE) console.log('timeout waiting for offers root');
+            resolve({ noSellers: false, div: null, timeout: true });
+            return;
+          }
+          setTimeout(checkDiv, 500);
           return;
         }
-        
+
         const contentLength = div.innerHTML.length;
-        const hasNoSellers = div.textContent.toLowerCase().includes('currently, there are no other sellers');
-        
-        if (DEBUG_MODE) {
-          console.log(`📦 all-offers-display found: ${contentLength} chars, noSellers: ${hasNoSellers}`);
-        }
-        
-        // If it has the \"no sellers\" message, we're done
-        if (hasNoSellers) {
-          if (DEBUG_MODE) console.log('🚫 Detected \"no other sellers\" - completing');
+        const noSellers = div.textContent.toLowerCase()
+          .includes('currently, there are no other sellers');
+
+        if (noSellers) {
           resolve({ noSellers: true, div });
           return;
         }
-        
-        // If it has substantial content (offers loaded), we're done
-        if (contentLength > 10000) {
-          if (DEBUG_MODE) console.log('✅ Offers appear to be loaded - completing');
+
+        // Heuristic: once we can see at least one offer container, we're ready.
+        const hasOfferContainer = !!div.querySelector(
+          '[id="aod-offer"], [id="aod-pinned-offer"], [id^="aod-offer-"]'
+        );
+        if (hasOfferContainer && contentLength > 2000) {
           resolve({ noSellers: false, div });
           return;
         }
-        
-        // Otherwise keep waiting
-        if (DEBUG_MODE) console.log(`⏳ Content too short (${contentLength} chars), waiting for more...`);
-        setTimeout(checkDiv, 1000);
+
+        if (Date.now() - start > 20000) {
+          resolve({ noSellers: false, div, timeout: true });
+          return;
+        }
+        setTimeout(checkDiv, 500);
       };
-      
-      // Start checking
+
       checkDiv();
-      
-      // Timeout after 20 seconds (increased)
-      setTimeout(() => {
-        if (DEBUG_MODE) console.log('⏰ Timeout waiting for offers to load');
-        const div = document.getElementById('all-offers-display');
-        resolve({ noSellers: false, div, timeout: true });
-      }, 20000);
     });
   }
-  
-  function parseOffersFromDiv(div) {
-    if (!div) return [];
-    
-    const prices = [];
-    
-    if (DEBUG_MODE) {
-      console.log(`📋 Parsing offers from all-offers-display div`);
-    }
-    
-    // Amazon uses complex div structures, not table rows
-    // Look for elements that contain prices and offer information
-    const allElements = div.querySelectorAll('*');
-    const elementsWithPrices = [];
-    
-    // First pass: find all elements containing price patterns
-    for (const element of allElements) {
-      const text = element.textContent || '';
-      if (text.includes('$') && text.match(/\$\d+\.\d{2}/)) {
-        // Check if this looks like an actual offer (has condition/seller info)
-        const lowerText = text.toLowerCase();
-        const hasOfferKeywords = lowerText.includes('new') || lowerText.includes('used') || 
-                                lowerText.includes('condition') || lowerText.includes('seller') ||
-                                lowerText.includes('ships from') || lowerText.includes('sold by');
-        
-        if (hasOfferKeywords || text.length < 500) { // Short text more likely to be actual offer
-          elementsWithPrices.push({
-            element,
-            text: text.substring(0, 300),
-            prices: text.match(/\$\d+\.\d{2}/g) || []
-          });
+
+  // Sub-component IDs that share the "aod-offer-" prefix but are NOT offer roots.
+  const SUBCOMPONENT_ID = /^aod-(pinned-)?offer-(heading|soldBy|shipsFrom|price|seller-rating|added-to-cart|updated-cart|not-added-to-cart|view-cart|promotion|qty-|upsell|list|main-content-show-more|main-content-show-less|additional-content|show-more-link|show-less-link)/;
+
+  function getOfferContainers(root) {
+    const candidates = root.querySelectorAll(
+      '[id="aod-offer"], [id="aod-pinned-offer"], [id^="aod-offer-"]'
+    );
+    const containers = [];
+    for (const el of candidates) {
+      if (SUBCOMPONENT_ID.test(el.id)) continue;
+      if (!el.querySelector('.a-price')) continue;
+      // Don't accept a container that already has one of its ancestors/descendants in the list.
+      let overlaps = false;
+      for (const existing of containers) {
+        if (existing.contains(el) || el.contains(existing)) {
+          overlaps = true;
+          break;
         }
       }
+      if (!overlaps) containers.push(el);
     }
-    
-    if (DEBUG_MODE) {
-      console.log(`📋 Found ${elementsWithPrices.length} elements with prices`);
-    }
-    
-    // Second pass: extract price information
-    const foundPrices = new Set(); // Avoid duplicates
-    
-    for (let i = 0; i < elementsWithPrices.length; i++) {
-      const item = elementsWithPrices[i];
-      const text = item.text;
-      const lowerText = text.toLowerCase();
-      
-      for (const priceText of item.prices) {
-        const price = parseFloat(priceText.replace('$', ''));
-        const priceKey = `${price}-${lowerText.substring(0, 50)}`; // Create unique key
-        
-        if (price >= 1 && price <= 500 && !foundPrices.has(priceKey)) {
-          foundPrices.add(priceKey);
-          
-          // Determine condition from surrounding text
-          let condition = 'New';
-          let type = 'New';
-          
-          if (lowerText.includes('used')) {
-            type = 'Used';
-            if (lowerText.includes('like new')) condition = 'Used - Like New';
-            else if (lowerText.includes('very good')) condition = 'Used - Very Good';
-            else if (lowerText.includes('good')) condition = 'Used - Good';
-            else if (lowerText.includes('acceptable')) condition = 'Used - Acceptable';
-            else condition = 'Used - Good';
-          } else if (lowerText.includes('refurbished')) {
-            condition = 'Refurbished';
-            type = 'Refurbished';
-          }
-          
-          // Apply books-only filtering (exclude Kindle / Audible / ebook / audiobook)
-          const shouldInclude = shouldIncludePrice(priceText.replace(/[^0-9]/g, ''), text);
-
-          if (shouldInclude) {
-            prices.push({
-              price,
-              type,
-              condition,
-              source: 'All Offers Display',
-              context: text.substring(0, 100)
-            });
-
-            if (DEBUG_MODE) {
-              console.log(`   ✅ OFFER ${prices.length}: $${price} (${condition})`);
-            }
-          } else if (DEBUG_MODE) {
-            console.log(`   ❌ FILTERED: $${price} (digital format)`);
-          }
-        }
-      }
-    }
-    
-    // Remove duplicates by price and sort
-    const uniquePrices = prices.reduce((acc, current) => {
-      const exists = acc.find(item => 
-        Math.abs(item.price - current.price) < 0.01
-      );
-      if (!exists) acc.push(current);
-      return acc;
-    }, []);
-    
-    const sortedPrices = uniquePrices.sort((a, b) => a.price - b.price);
-    
-    if (DEBUG_MODE) {
-      console.log(`📦 OFFERS RESULT: ${sortedPrices.length} valid offers`);
-      if (sortedPrices.length > 0) {
-        console.log(`💰 LOWEST PRICE: $${sortedPrices[0].price} (${sortedPrices[0].type})`);
-      }
-    }
-    
-    return sortedPrices;
+    return containers;
   }
-  
-  // Main function to extract offers (books-only)
+
+  function parsePrice(container) {
+    const priceEl = container.querySelector('span.a-price span[aria-hidden="true"]');
+    const raw = priceEl ? priceEl.textContent : '';
+    let match = raw.match(/\$\s*([\d,]+\.?\d*)/);
+    if (!match) {
+      const off = container.querySelector('span.a-price .a-offscreen');
+      if (off) match = (off.textContent || '').match(/\$\s*([\d,]+\.?\d*)/);
+    }
+    if (!match) return null;
+    const price = parseFloat(match[1].replace(/,/g, ''));
+    return Number.isFinite(price) ? price : null;
+  }
+
+  function parseShipping(container) {
+    const text = container.innerText || '';
+    if (/free\s+(shipping|delivery)/i.test(text)) return 0;
+    // "$3.99 shipping" or "$3.99 delivery"
+    const m = text.match(/\$\s*([\d,]+\.?\d{1,2})\s+(?:shipping|delivery)/i);
+    if (m) return parseFloat(m[1].replace(/,/g, ''));
+    // "+ $3.99 delivery" (AOD left column)
+    const m2 = text.match(/\+\s*\$\s*([\d,]+\.?\d{1,2})\s+(?:shipping|delivery)/i);
+    if (m2) return parseFloat(m2[1].replace(/,/g, ''));
+    return null; // unknown
+  }
+
+  function normalizeCondition(raw) {
+    const cleaned = (raw || '').replace(/\s+/g, ' ').trim();
+    if (!cleaned) return null;
+    const lower = cleaned.toLowerCase();
+    if (lower === 'new' || lower.startsWith('new ')) return 'New';
+    if (lower.includes('used')) {
+      if (lower.includes('like new')) return 'Used - Like New';
+      if (lower.includes('very good')) return 'Used - Very Good';
+      if (lower.includes('good')) return 'Used - Good';
+      if (lower.includes('acceptable')) return 'Used - Acceptable';
+      return 'Used';
+    }
+    if (lower.includes('refurbished')) return 'Refurbished';
+    if (lower.includes('collectible')) return 'Collectible';
+    return cleaned;
+  }
+
+  function parseCondition(container) {
+    const heading = container.querySelector(
+      '[id="aod-offer-heading"], [id^="aod-offer-heading-"]'
+    );
+    if (!heading) return null;
+    // innerText strips inline <style>/<script>. Fall back to textContent for
+    // headless contexts (jsdom-style) where innerText returns empty.
+    const raw = (heading.innerText && heading.innerText.trim())
+      ? heading.innerText
+      : heading.textContent;
+    return normalizeCondition(raw);
+  }
+
+  function parseSeller(container) {
+    const sold = container.querySelector(
+      '[id="aod-offer-soldBy"], [id^="aod-offer-soldBy-"]'
+    );
+    if (sold) {
+      // Real Amazon renders the seller name as
+      //   <span aria-label="SellerName. Opens a new page">SellerName</span>
+      // The aria-label strips away rating/disclosure text that creeps into innerText.
+      const labeled = sold.querySelector('[aria-label]');
+      if (labeled) {
+        const al = (labeled.getAttribute('aria-label') || '').trim();
+        const m = al.match(/^(.+?)\.\s*Opens a new page/i);
+        const name = m ? m[1].trim() : al;
+        if (name) return name;
+      }
+      // Fixture/legacy: anchor text or full seller block.
+      const link = sold.querySelector('a');
+      if (link && link.textContent && link.textContent.trim()) {
+        return link.textContent.trim();
+      }
+      const text = (sold.innerText || sold.textContent || '').replace(/\s+/g, ' ').trim();
+      if (text) {
+        return text
+          .replace(/^Sold by\s*/i, '')
+          .replace(/^Ships from and sold by\s*/i, '')
+          .replace(/\s*Seller rating.*$/i, '')
+          .trim() || null;
+      }
+    }
+
+    // Fallback: parse "Ships from and sold by X" from container innerText.
+    const full = container.innerText || '';
+    const m = full.match(/Ships from and sold by\s+([^\n]+)/i);
+    if (m) return m[1].replace(/\s*Seller rating.*$/i, '').trim();
+    const m2 = full.match(/(?:^|\n)\s*Sold by\s*\n\s*([^\n]+)/i);
+    if (m2) return m2[1].replace(/\s*Seller rating.*$/i, '').trim();
+    return null;
+  }
+
+  function extractOfferFrom(container) {
+    const text = container.innerText || container.textContent || '';
+    if (isDigitalContext(text)) return null;
+
+    const price = parsePrice(container);
+    if (price === null || price <= 0) return null;
+
+    const condition = parseCondition(container) || 'Unknown';
+    const seller = parseSeller(container) || 'Unknown';
+    const shippingCost = parseShipping(container);
+    const totalPrice = price + (shippingCost === null ? 0 : shippingCost);
+    const type = condition.startsWith('Used') ? 'Used' :
+                 condition === 'New' ? 'New' : condition;
+
+    return {
+      price,
+      shippingCost,
+      totalPrice,
+      condition,
+      seller,
+      type,
+      source: 'All Offers Display',
+    };
+  }
+
+  function dedupeOffers(offers) {
+    const seen = new Map();
+    for (const offer of offers) {
+      const key = [
+        offer.price.toFixed(2),
+        offer.shippingCost === null ? 'null' : offer.shippingCost.toFixed(2),
+        offer.seller,
+        offer.condition,
+      ].join('|');
+      if (!seen.has(key)) seen.set(key, offer);
+    }
+    return Array.from(seen.values());
+  }
+
+  function parseOffersFromDiv(root) {
+    if (!root) return [];
+
+    const containers = getOfferContainers(root);
+    if (DEBUG_MODE) {
+      console.log(`Parsing ${containers.length} offer containers`);
+    }
+
+    const raw = [];
+    for (const container of containers) {
+      const offer = extractOfferFrom(container);
+      if (offer) raw.push(offer);
+    }
+
+    const unique = dedupeOffers(raw);
+    unique.sort((a, b) => a.totalPrice - b.totalPrice);
+
+    if (DEBUG_MODE) {
+      console.log(`Dedup: ${raw.length} raw -> ${unique.length} unique offers`);
+      if (unique.length > 0) {
+        const best = unique[0];
+        console.log(`Lowest total: $${best.totalPrice.toFixed(2)} (${best.condition}, ${best.seller})`);
+      }
+    }
+
+    return unique;
+  }
+
   async function extractOffers() {
     try {
-      if (DEBUG_MODE) {
-        console.log(`🔍 OFFERS EXTRACTION: Starting (books-only)`);
-      }
-
       const result = await waitForOffersToLoad();
-
-      if (result.noSellers) {
-        if (DEBUG_MODE) console.log('🚫 NO OTHER SELLERS detected');
-        return [];
+      if (result.noSellers) return [];
+      if (result.timeout && DEBUG_MODE) {
+        console.log('TIMEOUT - parsing whatever is rendered');
       }
-
-      if (result.timeout) {
-        if (DEBUG_MODE) console.log('⏰ TIMEOUT - parsing current state');
-      }
-
-      const offers = parseOffersFromDiv(result.div);
-
-      if (DEBUG_MODE) {
-        console.log(`✅ EXTRACTION COMPLETE: ${offers.length > 0 ? '$' + offers[0].price + ' (' + offers[0].type + ')' : 'No offers'}`);
-      }
-
-      return offers;
-
+      return parseOffersFromDiv(result.div);
     } catch (error) {
-      console.error('❌ Error extracting offers:', error);
+      console.error('Error extracting offers:', error);
       return [];
     }
   }
 
-  // Listen for messages from background script
   chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === 'extractOffers') {
-      if (DEBUG_MODE) {
-        console.log(`📨 OFFERS CONTENT: Received extractOffers request`);
-      }
-
       extractOffers()
         .then(offers => {
-          if (DEBUG_MODE) {
-            console.log(`📤 OFFERS CONTENT: Sending response with ${offers.length} offers`);
-          }
           try {
             sendResponse({ success: true, offers });
           } catch (e) {
-            console.warn(`⚠️ OFFERS CONTENT: Could not send response: ${e.message}`);
+            console.warn(`Could not send response: ${e.message}`);
           }
         })
         .catch(error => {
-          console.error(`❌ OFFERS CONTENT: Error extracting offers:`, error);
           try {
             sendResponse({ success: false, error: error.message });
           } catch (e) {
-            console.warn(`⚠️ OFFERS CONTENT: Could not send error response: ${e.message}`);
+            console.warn(`Could not send error response: ${e.message}`);
           }
         });
-      return true; // Keep message channel open
+      return true;
     }
   });
-  
+
   if (DEBUG_MODE) {
-    console.log('🔍 OFFERS CONTENT SCRIPT: Ready to extract offers');
+    console.log('OFFERS CONTENT SCRIPT: ready');
   }
-  
 })();
