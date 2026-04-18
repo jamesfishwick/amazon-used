@@ -10,11 +10,10 @@ You will download a zip, unpack it into a folder, and point Chrome at that folde
 
 ### 1. Download the extension zip
 
-Download the latest release zip:
+Download the latest release zip. Pick whichever source applies to you:
 
-- **GitHub releases:** [cheapest-read-1.4.0.zip](https://github.com/jamesfishwick/amazon-used/releases/tag/v1.4.0)
-
-If GitHub is unavailable, the same zip is attached to the Paperclip tracking ticket [FIS-40](/FIS/issues/FIS-40).
+- **Early-access testers (D1):** the zip is attached to the Paperclip tracking ticket [FIS-40](/FIS/issues/FIS-40) as `cheapest-read-1.4.0.zip`.
+- **Public release (once cut):** [cheapest-read-1.4.0.zip on GitHub releases](https://github.com/jamesfishwick/amazon-used/releases/tag/v1.4.0). This link becomes active after the `v1.4.0` tag is published; before then, use the Paperclip attachment.
 
 ### 2. Unzip the download
 
