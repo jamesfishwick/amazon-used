@@ -14,6 +14,26 @@ function isDigitalFormat(text) {
          lowerText.includes('digital');
 }
 
+// Mirrors the wishlist UI renderer in content.js: returns labels like
+// "(Used - Very Good)", "(New)", "(Refurbished)". Prefers "Used - <subgrade>"
+// matches over bare subgrades so we don't echo the "Very Good" entry from
+// the AOD filter sidebar instead of the actual offer condition (FIS-73).
+function parseConditionLabel(text) {
+  const subgradeMatch = text.match(/Used\s*-\s*(Like\s+New|Very\s+Good|Good|Acceptable)\b/i);
+  if (subgradeMatch) {
+    return { type: 'Used', condition: subgradeMatch[1].replace(/\s+/g, ' ').trim() };
+  }
+  const typeMatch = text.match(/\b(New|Refurbished|Collectible|Used)\b/);
+  if (typeMatch) {
+    return { type: typeMatch[1], condition: '' };
+  }
+  return { type: 'Unknown', condition: '' };
+}
+
+function renderConditionLabel({ type, condition }) {
+  return `(${type}${condition ? ' - ' + condition : ''})`;
+}
+
 async function main() {
   const browser = await chromium.launch({ headless: true });
   const context = await browser.newContext();
@@ -130,12 +150,11 @@ async function main() {
 
     const totalPrice = itemPrice + shippingCost;
 
-    // Extract condition
-    let condition = 'Unknown';
-    const conditionMatch = fullText.match(/(New|Used\s*-\s*\w+|Used|Like\s+New|Very\s+Good|Good|Acceptable|Refurbished)/i);
-    if (conditionMatch) {
-      condition = conditionMatch[1].trim();
-    }
+    // Extract condition as the same rendered label users see in the wishlist UI
+    // (e.g. "(Used - Very Good)") rather than a bare subgrade lifted from the
+    // AOD filter sidebar.
+    const conditionParts = parseConditionLabel(fullText);
+    const condition = renderConditionLabel(conditionParts);
 
     // Extract seller
     let seller = 'Unknown';
