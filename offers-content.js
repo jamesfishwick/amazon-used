@@ -217,7 +217,6 @@
       condition,
       seller,
       type,
-      source: 'All Offers Display',
     };
   }
 

@@ -209,7 +209,6 @@ function displayPriceInfo(item, prices, isLoading = false, asin = null, productT
               <tr style="${idx === 0 ? 'background: #FFF3CD;' : ''}">
                 <td style="padding: 3px;">${p.type}</td>
                 <td style="padding: 3px; font-weight: bold;">$${p.price.toFixed(2)}</td>
-                <td style="padding: 3px; color: #666;">${p.source}</td>
                 ${p.condition ? `<td style="padding: 3px; font-size: 11px;">${p.condition}</td>` : ''}
               </tr>
             `).join('')}
