@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cheapest Read — Privacy Policy</title>
+  <style>
+    :root { color-scheme: light dark; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      max-width: 42rem;
+      margin: 0 auto;
+      padding: 2rem 1.25rem 4rem;
+      line-height: 1.55;
+      color: #222;
+      background: #fff;
+    }
+    @media (prefers-color-scheme: dark) {
+      body { color: #eaeaea; background: #111; }
+      a { color: #7fb2ff; }
+    }
+    h1 { font-size: 1.7rem; margin-bottom: 0.25rem; }
+    h2 { font-size: 1.15rem; margin-top: 2rem; border-bottom: 1px solid #ccc3; padding-bottom: 0.3rem; }
+    .meta { color: #666; font-size: 0.9rem; margin-top: 0; }
+    @media (prefers-color-scheme: dark) { .meta { color: #aaa; } }
+    code { font-size: 0.95em; background: #0001; padding: 0.05em 0.35em; border-radius: 3px; }
+    @media (prefers-color-scheme: dark) { code { background: #fff2; } }
+    ul { padding-left: 1.25rem; }
+    li + li { margin-top: 0.25rem; }
+    .callout {
+      margin: 1.5rem 0;
+      padding: 0.75rem 1rem;
+      border-left: 3px solid #10B981;
+      background: #10B98118;
+    }
+  </style>
+</head>
+<body>
+  <h1>Cheapest Read — Privacy Policy</h1>
+  <p class="meta">Effective 2026-04-19. Last reviewed 2026-04-19.</p>
+
+  <p class="callout">
+    <strong>Summary:</strong> Cheapest Read does not collect, transmit, sell, or share any personal data.
+    All scan results stay on your device.
+  </p>
+
+  <h2>What Cheapest Read does</h2>
+  <p>
+    Cheapest Read is a Chrome extension that scans your Amazon wishlist and surfaces the lowest total price
+    (item price plus shipping) across new and used offers for each book on the list, so you can buy the
+    most affordable copy without manually checking every listing.
+  </p>
+
+  <h2>Data we collect</h2>
+  <p>
+    <strong>None.</strong> The extension does not collect, transmit, log, or share any personal data,
+    browsing history, authentication credentials, financial information, location, or web activity
+    beyond what is required to operate the wishlist scan locally on your own device.
+  </p>
+
+  <h2>Where scan results are stored</h2>
+  <p>
+    All scan results are stored exclusively in your browser via Chrome's <code>chrome.storage.local</code>
+    API. Data never leaves your device and is not transmitted to any server controlled by the extension
+    author or any third party. You can clear stored results at any time by removing the extension or
+    clearing extension storage in Chrome.
+  </p>
+
+  <h2>Third-party services</h2>
+  <p>
+    <strong>None.</strong> The extension does not integrate any third-party analytics, telemetry, error
+    reporting, advertising, or remote-config services. The only network requests the extension makes are
+    to Amazon endpoints your browser is already authenticated against — specifically, your own wishlist
+    page and the per-book offer-listing pages you would otherwise have to open manually.
+  </p>
+
+  <h2>Permissions</h2>
+  <ul>
+    <li><code>activeTab</code> — read the Amazon wishlist tab you are actively viewing.</li>
+    <li><code>scripting</code> — inject content scripts that parse the wishlist and per-book offer pages.</li>
+    <li><code>tabs</code> — navigate to and read offer-listing pages for each book on your wishlist.</li>
+    <li><code>storage</code> — persist the most recent scan locally so the popup opens instantly.</li>
+    <li><code>host_permissions: https://www.amazon.com/*</code> — required to read your wishlist page and the
+      offer-listing pages for the books on it. No non-Amazon domains are accessed.</li>
+  </ul>
+
+  <h2>Data sharing and sale</h2>
+  <ul>
+    <li>We do <strong>not</strong> sell or transfer user data to third parties.</li>
+    <li>We do <strong>not</strong> use or transfer user data for purposes unrelated to the extension's single purpose.</li>
+    <li>We do <strong>not</strong> use or transfer user data to determine creditworthiness or for lending purposes.</li>
+  </ul>
+
+  <h2>Source code</h2>
+  <p>
+    Cheapest Read is open source. The extension code, release history, and this privacy policy are all
+    available at
+    <a href="https://github.com/jamesfishwick/amazon-used">github.com/jamesfishwick/amazon-used</a>.
+  </p>
+
+  <h2>Changes to this policy</h2>
+  <p>
+    Changes to this policy are tracked in the repository's git history. The "Effective" date above
+    reflects the most recent substantive update. Material changes will also be noted in the extension's
+    <a href="https://github.com/jamesfishwick/amazon-used/blob/main/CHANGELOG.md">CHANGELOG</a>.
+  </p>
+
+  <h2>Contact</h2>
+  <p>
+    Questions or concerns about this policy can be filed as issues on the
+    <a href="https://github.com/jamesfishwick/amazon-used/issues">project issue tracker</a>.
+  </p>
+</body>
+</html>
