@@ -23,6 +23,7 @@ Thumbs.db
 *~
 
 # Extension development
+dist/
 *.zip
 *.pem
 *.crx
