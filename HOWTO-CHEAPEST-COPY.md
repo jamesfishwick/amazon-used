@@ -19,7 +19,7 @@ Non-book items (Kindle, Audible, music, video) and non-US Amazon storefronts (`a
 1. **Open your wishlist.** In Chrome, go to `https://www.amazon.com/hz/wishlist/` and pick the wishlist you want to price-check. The URL should look like `https://www.amazon.com/hz/wishlist/ls/XXXXXXXXXX`.
 2. **Wait for the page to finish loading.** Amazon loads wishlist rows lazily as you scroll — that is normal.
 3. **Let the extension work.** As soon as the wishlist page is ready, Cheapest Read starts scanning in the background. You will briefly see a dark pill in the lower-right corner of the page that reads *"Price Checker Active"*; it fades out after a few seconds.
-4. **Watch results appear inline, book by book.** For each book, a yellow-bordered box is inserted directly underneath that book's existing price line, right on the wishlist row. While a book is being checked the box shows *"Checking all prices..."*. When the lookup finishes, it is replaced with the lowest-price summary described below.
+4. **Watch results appear inline, book by book.** For each book, a small result box is inserted directly underneath that book's existing price line, right on the wishlist row. While the book is being checked, a grey placeholder box shows *"Checking all prices..."*. Once the lookup finishes, that box turns yellow and displays the lowest-price summary described below.
 5. **Scroll to load more.** As you scroll further down the wishlist, Amazon reveals more books and Cheapest Read picks those up automatically — you do not need to re-trigger it.
 6. **Rescan if you want fresh numbers.** Click the Cheapest Read icon in the Chrome toolbar. When you are on a wishlist page, the popup shows *"On your Amazon wishlist. Prices auto-load as items appear."* and a **Rescan wishlist** button. Click it to re-check every visible book; the popup confirms *"Scanned N item(s)."* when it is done.
 
@@ -31,15 +31,15 @@ While a scan is in progress, Cheapest Read briefly opens a background tab for ea
 
 Each result box, shown inline under a wishlist item, contains:
 
-- **Lowest price headline** — for example, *"Lowest Price: $7.42 (Used - Very Good)"*. The first value is the lowest price Cheapest Read found. The value in parentheses is the offer type (**New**, **Used**, or **Refurbished**) and, for used copies, the condition Amazon reports (*Like New*, *Very Good*, *Good*, or *Acceptable*).
+- **Lowest price headline** — for example, *"Lowest Price: $7.42 (Used - Used - Very Good)"*. The first value is the lowest price Cheapest Read found. The value in parentheses is the offer type (**New**, **Used**, or **Refurbished**) followed by, for used copies, the condition Amazon reports (*Like New*, *Very Good*, *Good*, or *Acceptable*). The offer type is currently repeated inside the parentheses — you will see *(New - New)*, *(Used - Used - Very Good)*, or *(Refurbished - Refurbished)* rather than the condensed form. That is a known display glitch in the label only (the price and condition are correct); it is tracked as [FIS-71](/FIS/issues/FIS-71) and will be cleaned up in a follow-up.
 - **A link to Amazon's full offer listing** — labeled *"View all offers: ASIN XXXXXXXXXX"*. Click it to open Amazon's own "All offers" page for that book in a new tab, where you can pick which offer to buy.
 - **The raw offer-listing URL**, shown in small grey text. This is the same destination as the link above; it is there so you can copy or share it.
 - **Savings vs. the price Amazon currently shows on the wishlist** — for example, *"Save $3.56 vs current price ($10.98)"*. This line only appears when Cheapest Read actually found something cheaper than the price already listed on the wishlist row.
-- **A `View all N prices` disclosure** — click it to expand a small table of every qualifying offer Cheapest Read found for that book, sorted cheapest first. Each row has the offer type (New / Used / Refurbished), the price, and the condition if Amazon reported one.
+- **A `View all N prices` disclosure** — click it to expand a small table of every qualifying offer Cheapest Read found for that book, sorted cheapest first. Each row has four cells: the offer type (New / Used / Refurbished), the price, a source column that always reads *"All Offers Display"* (a placeholder — not a real seller name), and the condition if Amazon reported one. The source column is a known gap tracked as [FIS-72](/FIS/issues/FIS-72); ignore it for now.
 
 Two things to note about the table:
 
-- **No seller name.** Cheapest Read does not currently surface the seller (for example, "Amazon Warehouse" or a specific third-party bookseller) next to each offer. To see who is actually shipping a copy, click **View all offers** and read it on Amazon's own page.
+- **No real seller name.** The source column always reads *"All Offers Display"* — it does not tell you which seller (for example, "Amazon Warehouse" or a specific third-party bookseller) is actually shipping a copy. To see the real seller, click **View all offers** and read it on Amazon's own page.
 - **No "as of" timestamp.** Prices are live as of the most recent scan of that book. If you want to be sure a price is fresh, open the popup and click **Rescan wishlist** before buying.
 
 If Cheapest Read could not pull any offers for a given book, that book's box will read *"Unable to fetch additional prices"*. That is usually a retryable failure — see the troubleshooting section.
@@ -62,7 +62,7 @@ This usually means the wishlist tab was not fully loaded, or was reloaded after 
 
 ### A small red banner appeared on the wishlist page that says "Extension Reloaded"
 
-That means Chrome updated or reloaded Cheapest Read while you were on the wishlist tab. Refresh the wishlist tab to get a clean page-side script; the banner will clear itself after a few seconds.
+That means Chrome updated or reloaded Cheapest Read while you were on the wishlist tab. Refresh the wishlist tab to get a clean page-side script; the banner clears itself after about ten seconds.
 
 ### A book's result box says *"Unable to fetch additional prices"*
 
