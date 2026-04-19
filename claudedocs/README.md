@@ -50,7 +50,7 @@ tuples, which in practice merges the AOD pinned offer with its duplicate row.
 
 ## Historical scripts
 
-The ad-hoc Node scripts that produced this benchmark (`parse-api-simple.js`, `fetch-api-offers.js`, `check-api-calls.js`, and the various `debug-*` / `test-*` helpers) now live in [`../archive/`](../archive/) as reference only. The shipping extension no longer depends on them. Loose debug output (`*.json`, `*.txt`, `*.html` dumps) was removed as part of [FIS-36](/FIS/issues/FIS-36).
+The ad-hoc Node scripts that produced this benchmark (`parse-api-simple.js`, `fetch-api-offers.js`, `check-api-calls.js`, and the various `debug-*` / `test-*` helpers) are retained out-of-tree under the local `archive/` folder (gitignored) for reference only. The shipping extension no longer depends on them. Loose debug output (`*.json`, `*.txt`, `*.html` dumps) was removed as part of [FIS-36](/FIS/issues/FIS-36).
 
 ---
 
