@@ -186,16 +186,33 @@ async function run() {
     );
 
     const sellerKnown = parityOffers.filter(o => o.seller && o.seller !== 'Unknown').length;
-    const conditionKnown = parityOffers.filter(o => o.condition && o.condition !== 'Unknown').length;
+    // After FIS-71, offer.type carries the category ("Used", "New", ...) and
+    // offer.condition carries the sub-grade within Used ("Very Good", ...) or
+    // '' for categories without a sub-grade. The parity fixture has at least
+    // one category for every offer, so type is always populated; condition is
+    // only expected for Used sub-grades.
+    const typeKnown = parityOffers.filter(o => o.type && o.type !== 'Unknown').length;
     reporter.expect(
       'parity seller extracted for 100% of offers',
       sellerKnown === parityOffers.length,
       `got ${sellerKnown}/${parityOffers.length}`,
     );
     reporter.expect(
-      'parity condition extracted for 100% of offers',
-      conditionKnown === parityOffers.length,
-      `got ${conditionKnown}/${parityOffers.length}`,
+      'parity type extracted for 100% of offers',
+      typeKnown === parityOffers.length,
+      `got ${typeKnown}/${parityOffers.length}`,
+    );
+    const usedSubGrades = parityOffers.filter(o => o.type === 'Used' && o.condition);
+    reporter.expect(
+      'used offers expose non-empty sub-grade in condition',
+      usedSubGrades.length === parityOffers.filter(o => o.type === 'Used').length,
+      `got ${usedSubGrades.length}/${parityOffers.filter(o => o.type === 'Used').length}`,
+    );
+    const newOffersHaveEmptyCondition = parityOffers.filter(o => o.type === 'New' && o.condition === '');
+    reporter.expect(
+      'new offers carry empty condition (no doubled prefix at render)',
+      newOffersHaveEmptyCondition.length === parityOffers.filter(o => o.type === 'New').length,
+      `got ${newOffersHaveEmptyCondition.length}/${parityOffers.filter(o => o.type === 'New').length}`,
     );
 
     const amazonAt1999 = parityOffers.filter(o =>
