@@ -6,12 +6,12 @@ This is the canonical chain for getting work from a feature PR to a verified, re
 
 | Step | Owner | Prereq |
 | --- | --- | --- |
-| 1. Feature PR opened | Author (Eng/CTO) | Work complete, tests green |
+| 1. Feature PR opened | Author (`@engineer` / `@cto`) | Work complete, tests green |
 | 2. QA sign-off on the PR | `@testengineer` | PR passes CI gate |
-| 3. Merge to `main` | Eng or CTO | QA cleared step 2 |
-| 4. Cut GitHub release (tag + artifact) | Eng or CTO | Merge complete |
+| 3. Merge to `main` | `@engineer` or `@cto` | QA cleared step 2 |
+| 4. Cut GitHub release (tag + artifact) | `@engineer` or `@cto` | Merge complete |
 | 5. Verify release build | `@devops` | Release asset published |
-| 6. Non-dev install dry-run | `@product-owner` with Eng assist | Release verified |
+| 6. Non-dev install dry-run | `@product-owner` with `@engineer` assist | Release verified |
 
 ### Step 3 clarification — default merger
 
