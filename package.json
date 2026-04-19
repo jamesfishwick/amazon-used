@@ -5,7 +5,12 @@
   "main": "manifest.json",
   "scripts": {
     "test": "node tests/happy-path.spec.js && node tests/render-label.spec.js",
-    "build:zip": "bash scripts/build-zip.sh"
+    "build:zip": "bash scripts/build-zip.sh",
+    "prepare": "husky",
+    "lint": "biome check",
+    "lint:fix": "biome check --write",
+    "format": "biome format",
+    "format:fix": "biome format --write"
   },
   "keywords": [],
   "author": "",
@@ -13,5 +18,14 @@
   "type": "commonjs",
   "dependencies": {
     "playwright": "^1.53.1"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.4.12",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0"
+  },
+  "lint-staged": {
+    "*.{js,json}": "biome check --write --no-errors-on-unmatched --files-ignore-unknown=true",
+    "*.sh": "shellcheck"
   }
 }

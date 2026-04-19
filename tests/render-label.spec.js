@@ -4,8 +4,33 @@
 // type prefix. Runs content.js in a headless page, stubs in a synthetic
 // wishlist item + background responses, and inspects the injected DOM.
 
-const path = require('path');
-const { chromium } = require('playwright');
+const path = require("node:path");
+const { chromium } = require("playwright");
+
+async function renderLabel(page, type, condition) {
+  return page.evaluate(
+    ([type, condition]) => {
+      const item = document.querySelector('[data-itemid="TEST"]');
+      const existing = item.querySelector(".amz-price-checker-display");
+      if (existing) existing.remove();
+      const prices = [
+        {
+          type,
+          condition,
+          price: 9.99,
+          totalPrice: 9.99,
+          source: "TEST",
+          seller: "TestSeller",
+          shippingCost: 0,
+        },
+      ];
+      displayPriceInfo(item, prices, false, "TEST", "book", null);
+      const display = item.querySelector(".amz-price-checker-display");
+      return display ? display.innerText.replace(/\s+/g, " ").trim() : "";
+    },
+    [type, condition],
+  );
+}
 
 async function run() {
   const browser = await chromium.launch({ headless: true });
@@ -13,7 +38,7 @@ async function run() {
   const pass = (label) => console.log(`  PASS  ${label}`);
   const fail = (label, detail) => {
     failures.push(label);
-    console.log(`  FAIL  ${label}${detail ? ` (${detail})` : ''}`);
+    console.log(`  FAIL  ${label}${detail ? ` (${detail})` : ""}`);
   };
 
   try {
@@ -35,48 +60,28 @@ async function run() {
     await page.addInitScript(() => {
       window.chrome = {
         runtime: {
-          id: 'test-harness',
+          id: "test-harness",
           onMessage: { addListener: () => {} },
           sendMessage: () => Promise.resolve({ success: true, prices: [] }),
         },
       };
     });
 
-    await page.addScriptTag({ path: path.join(__dirname, '..', 'content.js') });
-
-    async function renderLabel(type, condition) {
-      return page.evaluate(([type, condition]) => {
-        const item = document.querySelector('[data-itemid="TEST"]');
-        const existing = item.querySelector('.amz-price-checker-display');
-        if (existing) existing.remove();
-        const prices = [{
-          type,
-          condition,
-          price: 9.99,
-          totalPrice: 9.99,
-          source: 'TEST',
-          seller: 'TestSeller',
-          shippingCost: 0,
-        }];
-        displayPriceInfo(item, prices, false, 'TEST', 'book', null);
-        const display = item.querySelector('.amz-price-checker-display');
-        return display ? display.innerText.replace(/\s+/g, ' ').trim() : '';
-      }, [type, condition]);
-    }
+    await page.addScriptTag({ path: path.join(__dirname, "..", "content.js") });
 
     const cases = [
-      { type: 'Used', condition: 'Very Good',  wants: '(Used - Very Good)' },
-      { type: 'Used', condition: 'Like New',   wants: '(Used - Like New)' },
-      { type: 'Used', condition: 'Good',       wants: '(Used - Good)' },
-      { type: 'Used', condition: 'Acceptable', wants: '(Used - Acceptable)' },
-      { type: 'Used', condition: '',           wants: '(Used)' },
-      { type: 'New', condition: '',            wants: '(New)' },
-      { type: 'Refurbished', condition: '',    wants: '(Refurbished)' },
-      { type: 'Collectible', condition: '',    wants: '(Collectible)' },
+      { type: "Used", condition: "Very Good", wants: "(Used - Very Good)" },
+      { type: "Used", condition: "Like New", wants: "(Used - Like New)" },
+      { type: "Used", condition: "Good", wants: "(Used - Good)" },
+      { type: "Used", condition: "Acceptable", wants: "(Used - Acceptable)" },
+      { type: "Used", condition: "", wants: "(Used)" },
+      { type: "New", condition: "", wants: "(New)" },
+      { type: "Refurbished", condition: "", wants: "(Refurbished)" },
+      { type: "Collectible", condition: "", wants: "(Collectible)" },
     ];
 
     for (const tc of cases) {
-      const text = await renderLabel(tc.type, tc.condition);
+      const text = await renderLabel(page, tc.type, tc.condition);
       const contains = text.includes(tc.wants);
       // Guard against doubled-prefix regressions.
       const doubled =
@@ -101,7 +106,7 @@ async function run() {
     console.log(`\nFAIL: ${failures.length} assertion(s) failed`);
     process.exit(1);
   }
-  console.log('\nPASS: all render assertions passed');
+  console.log("\nPASS: all render assertions passed");
 }
 
 run().catch((err) => {
