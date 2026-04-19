@@ -25,6 +25,10 @@ Chrome extension that scans your Amazon wishlist and surfaces the **lowest total
 
 See [INSTALLATION.md](INSTALLATION.md).
 
+## Use
+
+See [HOWTO-CHEAPEST-COPY.md](HOWTO-CHEAPEST-COPY.md) for the end-user walkthrough: opening your wishlist, reading the inline result boxes, and troubleshooting common failure modes.
+
 ## Develop
 
 See [DEVELOPMENT.md](DEVELOPMENT.md) for the dev workflow and project layout. Deep technical notes on the offers endpoint, DOM selectors, and extraction recipe live in [claudedocs/](claudedocs/README.md).
