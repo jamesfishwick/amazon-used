@@ -197,12 +197,18 @@
     const price = parsePrice(container);
     if (price === null || price <= 0) return null;
 
-    const condition = parseCondition(container) || 'Unknown';
+    const normalized = parseCondition(container) || 'Unknown';
     const seller = parseSeller(container) || 'Unknown';
     const shippingCost = parseShipping(container);
     const totalPrice = price + (shippingCost === null ? 0 : shippingCost);
-    const type = condition.startsWith('Used') ? 'Used' :
-                 condition === 'New' ? 'New' : condition;
+    // normalizeCondition returns fused labels like "Used - Very Good" for
+    // sub-graded used offers, and bare category names ("New", "Refurbished",
+    // "Collectible", "Used", "Unknown") otherwise. Split into a category
+    // `type` and optional sub-grade `condition` so the renderer (content.js)
+    // can format as `(Used - Very Good)` / `(New)` without doubling prefixes.
+    const dashIdx = normalized.indexOf(' - ');
+    const type = dashIdx > 0 ? normalized.slice(0, dashIdx) : normalized;
+    const condition = dashIdx > 0 ? normalized.slice(dashIdx + 3) : '';
 
     return {
       price,
@@ -222,6 +228,7 @@
         offer.price.toFixed(2),
         offer.shippingCost === null ? 'null' : offer.shippingCost.toFixed(2),
         offer.seller,
+        offer.type,
         offer.condition,
       ].join('|');
       if (!seen.has(key)) seen.set(key, offer);
