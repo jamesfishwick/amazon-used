@@ -33,6 +33,10 @@ See [HOWTO-CHEAPEST-COPY.md](HOWTO-CHEAPEST-COPY.md) for the end-user walkthroug
 
 See [DEVELOPMENT.md](DEVELOPMENT.md) for the dev workflow and project layout. Deep technical notes on the offers endpoint, DOM selectors, and extraction recipe live in [claudedocs/](claudedocs/README.md).
 
+## Contributing / Release
+
+See [RELEASE-WORKFLOW.md](RELEASE-WORKFLOW.md) for the canonical chain from PR to verified release (owners, prereqs, and skip-paths for hotfixes / non-release / doc-only PRs).
+
 ## Roadmap
 
 The canonical roadmap is the `FIS-23` plan (Milestones A–D: stabilize + narrow scope, extraction parity, harden for daily use, distribution). This README does not duplicate it — if the plan and this doc disagree, the plan wins.
