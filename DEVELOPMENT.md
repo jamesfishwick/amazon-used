@@ -29,6 +29,17 @@ For the detailed file inventory see [PROJECT-STRUCTURE.md](PROJECT-STRUCTURE.md)
 4. Click the extension icon to trigger a scan.
 5. Use the debug-mode toggle to surface per-ASIN fetch/parse output.
 
+## Linting and pre-commit
+
+[Biome](https://biomejs.dev) lints and formats JS + JSON. [shellcheck](https://www.shellcheck.net) lints shell scripts. Both run on staged files via a husky pre-commit hook managed by `lint-staged`.
+
+- `npm install` registers the hook (`prepare` script runs `husky`).
+- On commit: Biome auto-fixes staged JS/JSON; shellcheck runs against staged `*.sh`. The commit is blocked if any file still fails after Biome's fixes.
+- Manual runs: `npm run lint` (check only), `npm run lint:fix` (auto-fix), `shellcheck scripts/*.sh`.
+- CI runs the same Biome and shellcheck steps before tests, so `git commit --no-verify` still gets caught at merge time.
+
+shellcheck is required in CI and recommended locally (`brew install shellcheck`).
+
 ## Testing
 
 The `tests/` directory contains standalone Node/Playwright scripts used for manual and ad-hoc validation. See [tests/README.md](tests/README.md) for the active vs. archived scripts. A unified `npm test` harness is on the roadmap and tracked in the FIS-23 plan.

@@ -17,15 +17,13 @@ function renderOnWishlist(tabId) {
     chrome.tabs.sendMessage(tabId, { action: "scanWishlist" }, (response) => {
       button.disabled = false;
       if (chrome.runtime.lastError) {
-        messageEl.textContent =
-          "Could not reach the page. Refresh the wishlist tab and try again.";
+        messageEl.textContent = "Could not reach the page. Refresh the wishlist tab and try again.";
         return;
       }
-      if (response && response.success) {
+      if (response?.success) {
         messageEl.textContent = `Scanned ${response.itemsProcessed ?? 0} item(s).`;
       } else {
-        messageEl.textContent =
-          (response && response.error) || "Scan failed. See the page console for details.";
+        messageEl.textContent = response?.error || "Scan failed. See the page console for details.";
       }
     });
   });
@@ -51,8 +49,8 @@ function renderOffWishlist() {
 }
 
 chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-  const tab = tabs && tabs[0];
-  if (tab && tab.url && WISHLIST_URL_PATTERN.test(tab.url)) {
+  const tab = tabs?.[0];
+  if (tab?.url && WISHLIST_URL_PATTERN.test(tab.url)) {
     renderOnWishlist(tab.id);
   } else {
     renderOffWishlist();
