@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+  <meta charset="utf-8">
+  <title>Offer Listing Fixture - parity edge cases</title>
+</head>
+<body>
+  <!--
+    Mirrors the AOD structure observed on live amazon.com:
+      - Offer containers repeat id="aod-offer" (HTML-invalid, but real).
+      - A pinned offer sits alongside a regular offer for the same seller,
+        which dedup must collapse.
+      - A sticky-pinned offer appears but is skipped entirely by the selector.
+      - One offer uses the aria-label seller shape; another uses the
+        "Ships from and sold by Amazon.com" legacy shape; one omits shipping.
+  -->
+  <div id="aod-container">
+    <div id="all-offers-display" role="main">
+
+      <!-- Sticky-pinned offer: visual duplicate of the pinned offer below.
+           Extractor must ignore this (no soldBy, skipped by selector). -->
+      <div id="aod-sticky-pinned-offer">
+        <div id="aod-offer-heading"><span class="a-size-base a-text-bold">New</span></div>
+        <span class="a-price"><span aria-hidden="true">$19.99</span></span>
+        <div>FREE delivery with Amazon Prime</div>
+      </div>
+
+      <!-- Pinned offer == Amazon's own offer (should dedup with aod-offer #3). -->
+      <div id="aod-pinned-offer" class="a-section">
+        <div id="aod-offer-heading"><span class="a-size-base a-text-bold">New</span></div>
+        <span class="a-price"><span aria-hidden="true">$19.99</span></span>
+        <div>FREE delivery</div>
+        <div id="aod-offer-soldBy">
+          <span>Sold by</span>
+          <span aria-label="Amazon.com. Opens a new page">Amazon.com</span>
+        </div>
+      </div>
+
+      <div id="aod-offer-list">
+
+        <!-- Offer 1: Used - Very Good, paid shipping, named seller via aria-label. -->
+        <div id="aod-offer" class="a-section">
+          <span class="a-price"><span aria-hidden="true">$13.51</span></span>
+          <div class="a-row">+ $4.99 delivery</div>
+          <div id="aod-offer-heading">
+            <span class="a-size-base a-text-bold">     Used - Very Good      </span>
+          </div>
+          <div id="aod-offer-soldBy">
+            <span>Sold by</span>
+            <span aria-label="HPB-Diamond. Opens a new page">HPB-Diamond</span>
+          </div>
+          <div id="aod-offer-seller-rating">4.5 out of 5 stars (1,234 ratings)</div>
+        </div>
+
+        <!-- Offer 2: New, FREE delivery, seller via legacy "Ships from and sold by". -->
+        <div id="aod-offer" class="a-section">
+          <span class="a-price"><span aria-hidden="true">$18.50</span></span>
+          <div class="a-row">FREE Shipping</div>
+          <div id="aod-offer-heading">
+            <span class="a-size-base a-text-bold">New</span>
+          </div>
+          <div id="aod-offer-soldBy">
+            <span>Ships from and sold by Amazon.com</span>
+          </div>
+        </div>
+
+        <!-- Offer 3: Amazon.com at $19.99 - same as pinned offer.  Must dedup. -->
+        <div id="aod-offer" class="a-section">
+          <span class="a-price"><span aria-hidden="true">$19.99</span></span>
+          <div class="a-row">FREE delivery</div>
+          <div id="aod-offer-heading">
+            <span class="a-size-base a-text-bold">New</span>
+          </div>
+          <div id="aod-offer-soldBy">
+            <span>Sold by</span>
+            <span aria-label="Amazon.com. Opens a new page">Amazon.com</span>
+          </div>
+        </div>
+
+        <!-- Offer 4: Digital format markers (Kindle) in container text - must be filtered. -->
+        <div id="aod-offer" class="a-section">
+          <span class="a-price"><span aria-hidden="true">$9.99</span></span>
+          <div class="a-row">Read instantly on your Kindle</div>
+          <div id="aod-offer-heading">
+            <span class="a-size-base a-text-bold">New</span>
+          </div>
+          <div id="aod-offer-soldBy">
+            <span>Sold by</span>
+            <span aria-label="Amazon Digital Services. Opens a new page">Amazon Digital Services</span>
+          </div>
+        </div>
+
+        <!-- Offer 5: Used - Good at same price as Offer 1 but different seller.
+             Must survive dedup. -->
+        <div id="aod-offer" class="a-section">
+          <span class="a-price"><span aria-hidden="true">$13.51</span></span>
+          <div class="a-row">+ $4.99 delivery</div>
+          <div id="aod-offer-heading">
+            <span class="a-size-base a-text-bold">Used - Good</span>
+          </div>
+          <div id="aod-offer-soldBy">
+            <span>Sold by</span>
+            <span aria-label="ThriftBooks-Dallas. Opens a new page">ThriftBooks-Dallas</span>
+          </div>
+        </div>
+
+        <!-- Offer 6: Shipping unknown (neither FREE nor $X pattern present). -->
+        <div id="aod-offer" class="a-section">
+          <span class="a-price"><span aria-hidden="true">$22.00</span></span>
+          <div class="a-row">Arrives in 7-14 business days</div>
+          <div id="aod-offer-heading">
+            <span class="a-size-base a-text-bold">Used - Acceptable</span>
+          </div>
+          <div id="aod-offer-soldBy">
+            <span>Sold by</span>
+            <span aria-label="BookBarn. Opens a new page">BookBarn</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

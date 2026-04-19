@@ -1,11 +1,10 @@
 # Dependencies
 node_modules/
-package-lock.json
 
 # Development files
-tests/
 archive/
 screenshots/
+tests/archive/
 
 # OS files
 .DS_Store
