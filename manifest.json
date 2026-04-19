@@ -1,8 +1,14 @@
 {
   "manifest_version": 3,
   "name": "Cheapest Read",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "Find the lowest total price (item + shipping) across new and used book offers on your wishlist.",
+  "icons": {
+    "16": "icons/icon-16.png",
+    "32": "icons/icon-32.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
   "permissions": ["activeTab", "scripting", "tabs", "storage"],
   "host_permissions": ["https://www.amazon.com/*"],
   "background": {

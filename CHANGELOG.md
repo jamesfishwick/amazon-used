@@ -8,10 +8,17 @@ Entries are only added from the git record — nothing is back-filled from memor
 
 ## [Unreleased]
 
+## [1.4.1] - 2026-04-19
+
 ### Added
 
-- `CHANGELOG.md` (this file) and `docs/VERSIONING.md` — single source for release notes plus a written SemVer bump convention (FIS-66).
+- Extension icons at 16/32/48/128 px, plus a 128x128 Chrome Web Store listing icon, generated from `icons/icon.svg` (solid emerald background, white `CR` mark). Unblocks Chrome Web Store submission (FIS-41). Board-approved as a placeholder; a designed asset is planned for a future release once a designer is on board.
+- `CHANGELOG.md` and `docs/VERSIONING.md` — single source for release notes plus a written SemVer bump convention (FIS-66).
 - `RELEASE-WORKFLOW.md` — canonical feature-PR to release chain, ratified on FIS-61, drafted in FIS-62 (#5).
+
+### Changed
+
+- `scripts/build-zip.sh` now includes the `icons/` directory (PNG assets only) in the packaged zip; the SVG source and the CWS store-only 128 icon are excluded from the runtime package.
 
 ## [1.4.0] - 2026-04-18
 
@@ -41,9 +48,11 @@ Initial repo import. Not a public release. `1.3` is the version the working copy
 Compare/release links. Only tags that actually exist go here. Add new lines
 as new tags are pushed; do not reference tags that have not been cut.
 
-    [Unreleased]: https://github.com/jamesfishwick/amazon-used/compare/v1.4.0...HEAD
+    [Unreleased]: https://github.com/jamesfishwick/amazon-used/compare/v1.4.1...HEAD
+    [1.4.1]:      https://github.com/jamesfishwick/amazon-used/releases/tag/v1.4.1
     [1.4.0]:      https://github.com/jamesfishwick/amazon-used/releases/tag/v1.4.0
 -->
 
-[Unreleased]: https://github.com/jamesfishwick/amazon-used/compare/v1.4.0...HEAD
+[Unreleased]: https://github.com/jamesfishwick/amazon-used/compare/v1.4.1...HEAD
+[1.4.1]: https://github.com/jamesfishwick/amazon-used/releases/tag/v1.4.1
 [1.4.0]: https://github.com/jamesfishwick/amazon-used/releases/tag/v1.4.0
