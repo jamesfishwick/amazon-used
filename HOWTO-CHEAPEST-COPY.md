@@ -31,7 +31,12 @@ While a scan is in progress, Cheapest Read briefly opens a background tab for ea
 
 Each result box, shown inline under a wishlist item, contains:
 
-- **Lowest price headline** — for example, *"Lowest Price: $7.42 (Used - Very Good)"*. The first value is the lowest price Cheapest Read found. The value in parentheses is the offer type (**New**, **Used**, or **Refurbished**) followed by, for used copies, the condition Amazon reports (*Like New*, *Very Good*, *Good*, or *Acceptable*). New and refurbished offers render without a trailing condition, e.g. *(New)* or *(Refurbished)*.
+- **Lowest price headline** — for example, *"Lowest Price: $7.42 (Used - Very Good)"*. The first value is the lowest price Cheapest Read found. The value in parentheses is the offer-type label Amazon reports for that copy. It renders in one of five shapes:
+    - *(New)* — a new copy. Example: *"Lowest Price: $14.99 (New)"*.
+    - *(Used)* — a used copy that Amazon reports without a specific subgrade. Example: *"Lowest Price: $6.50 (Used)"*.
+    - *(Used - <subgrade>)* — a used copy whose subgrade is one of *Like New*, *Very Good*, *Good*, or *Acceptable*. Example: *"Lowest Price: $7.42 (Used - Very Good)"*.
+    - *(Refurbished)* — a refurbished copy. Example: *"Lowest Price: $9.99 (Refurbished)"*.
+    - *(Collectible)* — a collectible copy (rare; appears when Amazon files the offer under its Collectible category). Example: *"Lowest Price: $24.00 (Collectible)"*.
 - **A link to Amazon's full offer listing** — labeled *"View all offers: ASIN XXXXXXXXXX"*. Click it to open Amazon's own "All offers" page for that book in a new tab, where you can pick which offer to buy.
 - **The raw offer-listing URL**, shown in small grey text. This is the same destination as the link above; it is there so you can copy or share it.
 - **Savings vs. the price Amazon currently shows on the wishlist** — for example, *"Save $3.56 vs current price ($10.98)"*. This line only appears when Cheapest Read actually found something cheaper than the price already listed on the wishlist row.
