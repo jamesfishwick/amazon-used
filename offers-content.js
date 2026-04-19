@@ -146,7 +146,6 @@
               price,
               type,
               condition,
-              source: 'All Offers Display',
               context: text.substring(0, 100)
             });
 

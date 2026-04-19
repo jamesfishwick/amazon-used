@@ -35,11 +35,11 @@ Each result box, shown inline under a wishlist item, contains:
 - **A link to Amazon's full offer listing** — labeled *"View all offers: ASIN XXXXXXXXXX"*. Click it to open Amazon's own "All offers" page for that book in a new tab, where you can pick which offer to buy.
 - **The raw offer-listing URL**, shown in small grey text. This is the same destination as the link above; it is there so you can copy or share it.
 - **Savings vs. the price Amazon currently shows on the wishlist** — for example, *"Save $3.56 vs current price ($10.98)"*. This line only appears when Cheapest Read actually found something cheaper than the price already listed on the wishlist row.
-- **A `View all N prices` disclosure** — click it to expand a small table of every qualifying offer Cheapest Read found for that book, sorted cheapest first. Each row has four cells: the offer type (New / Used / Refurbished), the price, a source column that always reads *"All Offers Display"* (a placeholder — not a real seller name), and the condition if Amazon reported one. The source column is a known gap tracked as [FIS-72](/FIS/issues/FIS-72); ignore it for now.
+- **A `View all N prices` disclosure** — click it to expand a small table of every qualifying offer Cheapest Read found for that book, sorted cheapest first. Each row has three cells: the offer type (New / Used / Refurbished), the price, and the condition if Amazon reported one.
 
 Two things to note about the table:
 
-- **No real seller name.** The source column always reads *"All Offers Display"* — it does not tell you which seller (for example, "Amazon Warehouse" or a specific third-party bookseller) is actually shipping a copy. To see the real seller, click **View all offers** and read it on Amazon's own page.
+- **No seller name.** Cheapest Read does not surface the seller (for example, "Amazon Warehouse" or a specific third-party bookseller) next to each offer. To see who is actually selling a given offer, click **View all offers** and read it on Amazon's own page.
 - **No "as of" timestamp.** Prices are live as of the most recent scan of that book. If you want to be sure a price is fresh, open the popup and click **Rescan wishlist** before buying.
 
 If Cheapest Read could not pull any offers for a given book, that book's box will read *"Unable to fetch additional prices"*. That is usually a retryable failure — see the troubleshooting section.
