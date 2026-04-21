@@ -266,33 +266,47 @@
     return unique;
   }
 
+  // Amazon serves a CAPTCHA page (HTTP 200, not 429) when it rate-limits a
+  // scrape-like fetch. The offers container never renders, so the parser
+  // silently produces zero offers without this short-circuit.
+  function detectRobotCheck() {
+    const bodyText = document.body?.innerText || "";
+    if (bodyText.includes("Enter the characters you see below")) return true;
+    if (document.querySelector('form[action*="validateCaptcha"]')) return true;
+    return false;
+  }
+
   async function extractOffers() {
     try {
+      if (detectRobotCheck()) {
+        if (DEBUG_MODE) console.log("ROBOT CHECK page detected");
+        return { success: false, reason: "robot-check" };
+      }
       const result = await waitForOffersToLoad();
-      if (result.noSellers) return [];
+      if (result.noSellers) return { success: true, offers: [] };
       if (result.timeout && DEBUG_MODE) {
         console.log("TIMEOUT - parsing whatever is rendered");
       }
-      return parseOffersFromDiv(result.div);
+      const offers = parseOffersFromDiv(result.div);
+      return { success: true, offers };
     } catch (error) {
-      console.error("Error extracting offers:", error);
-      return [];
+      return { success: false, reason: `threw: ${error.message}` };
     }
   }
 
   chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
     if (request.action === "extractOffers") {
       extractOffers()
-        .then((offers) => {
+        .then((result) => {
           try {
-            sendResponse({ success: true, offers });
+            sendResponse(result);
           } catch (e) {
             console.warn(`Could not send response: ${e.message}`);
           }
         })
         .catch((error) => {
           try {
-            sendResponse({ success: false, error: error.message });
+            sendResponse({ success: false, reason: `threw: ${error.message}` });
           } catch (e) {
             console.warn(`Could not send error response: ${e.message}`);
           }

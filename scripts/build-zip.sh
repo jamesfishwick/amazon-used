@@ -11,6 +11,7 @@ RUNTIME_FILES=(
   manifest.json
   background.js
   content.js
+  offer-retry.js
   offers-content.js
   popup.html
   popup.js

@@ -8,6 +8,10 @@ Entries are only added from the git record — nothing is back-filled from memor
 
 ## [Unreleased]
 
+### Added
+
+- Retry + exponential backoff on offer-page failures (FIS-108, Milestone C). `background.js` now wraps the per-ASIN tab-based offer fetch in a retry loop that retries up to 3 attempts with 500ms base delay, 2x multiplier, and a 4000ms cap on the failure signals we can observe from the tab layer: tab-create errors, `sendMessage` rejection, the 30s timeout, `extractOffers` returning `{success: false}`, and a new robot-check heuristic in `offers-content.js` that catches Amazon's CAPTCHA page. When retries exhaust, the affected wishlist item now shows an explicit "Offer fetch failed — retry" affordance (with a Retry button) instead of being silently dropped. New `src/offer-retry.js` module; new `tests/retry-backoff.spec.js` covering the backoff schedule, the retry-on-failure contract, and the end-to-end flow against the offer fixture.
+
 ### Changed
 
 - Repository layout reorganized (FIS-11): extension source moved under `src/`, project docs (except `README.md` and `CLAUDE.md`) consolidated under `docs/`. No change to the shipped zip contents — `manifest.json`, `background.js`, `content.js`, `offers-content.js`, `popup.html`, `popup.js`, and `icons/` remain at the zip root. Contributors loading unpacked from a clone now select `src/` as the extension root instead of the repository root.
