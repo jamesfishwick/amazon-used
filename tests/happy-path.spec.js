@@ -76,7 +76,7 @@ async function run() {
       };
     });
     await wishlistPage.goto(`${base}/wishlist.html`, { waitUntil: "domcontentloaded" });
-    await wishlistPage.addScriptTag({ path: path.join(ROOT, "content.js") });
+    await wishlistPage.addScriptTag({ path: path.join(ROOT, "src", "content.js") });
 
     const { items, asins } = await wishlistPage.evaluate(() => {
       const found = findWishlistItems();
@@ -111,7 +111,7 @@ async function run() {
       };
     });
     await offersPage.goto(`${base}/offers-${targetAsin}.html`, { waitUntil: "domcontentloaded" });
-    await offersPage.addScriptTag({ path: path.join(ROOT, "offers-content.js") });
+    await offersPage.addScriptTag({ path: path.join(ROOT, "src", "offers-content.js") });
 
     const listenerPresent = await offersPage.evaluate(
       () => typeof window.__offersListener === "function",
@@ -170,7 +170,7 @@ async function run() {
       };
     });
     await parityPage.goto(`${base}/offers-parity.html`, { waitUntil: "domcontentloaded" });
-    await parityPage.addScriptTag({ path: path.join(ROOT, "offers-content.js") });
+    await parityPage.addScriptTag({ path: path.join(ROOT, "src", "offers-content.js") });
 
     const parityResponse = await parityPage.evaluate(
       () =>

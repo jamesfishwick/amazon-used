@@ -2,11 +2,15 @@
 
 All notable changes to **Cheapest Read** will be documented in this file.
 
-The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/), and the project follows [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.html). See [`docs/VERSIONING.md`](docs/VERSIONING.md) for the bump rules, source-of-truth version field, and how to decide what the next version number should be.
+The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/), and the project follows [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.html). See [`VERSIONING.md`](VERSIONING.md) for the bump rules, source-of-truth version field, and how to decide what the next version number should be.
 
-Entries are only added from the git record — nothing is back-filled from memory. Versions below match the `version` field in [`manifest.json`](manifest.json), which is what Chrome actually installs.
+Entries are only added from the git record — nothing is back-filled from memory. Versions below match the `version` field in [`src/manifest.json`](../src/manifest.json), which is what Chrome actually installs.
 
 ## [Unreleased]
+
+### Changed
+
+- Repository layout reorganized (FIS-11): extension source moved under `src/`, project docs (except `README.md` and `CLAUDE.md`) consolidated under `docs/`. No change to the shipped zip contents — `manifest.json`, `background.js`, `content.js`, `offers-content.js`, `popup.html`, `popup.js`, and `icons/` remain at the zip root. Contributors loading unpacked from a clone now select `src/` as the extension root instead of the repository root.
 
 ## [1.4.1] - 2026-04-19
 

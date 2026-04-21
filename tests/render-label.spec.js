@@ -67,7 +67,7 @@ async function run() {
       };
     });
 
-    await page.addScriptTag({ path: path.join(__dirname, "..", "content.js") });
+    await page.addScriptTag({ path: path.join(__dirname, "..", "src", "content.js") });
 
     const cases = [
       { type: "Used", condition: "Very Good", wants: "(Used - Very Good)" },

@@ -28,8 +28,8 @@ Keep each section concise. Reviewer will block on anything missing.
 
 <!-- One line per new package or bump, with a one-line justification.
      If none, write "None."
-     For manifest.json version bumps: follow docs/VERSIONING.md and update
-     CHANGELOG.md in the same PR. -->
+     For src/manifest.json version bumps: follow docs/VERSIONING.md and update
+     docs/CHANGELOG.md in the same PR. -->
 
 -
 

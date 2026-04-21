@@ -82,6 +82,6 @@ Contributors working from a clone can skip the zip:
 
 1. Clone the repository.
 2. Open `chrome://extensions/` and enable **Developer mode**.
-3. Click **Load unpacked** and select the repository root (the directory that contains `manifest.json`). There is no `src/` subdirectory.
+3. Click **Load unpacked** and select the `src/` directory (the one that contains `manifest.json`). Do not select the repository root.
 
-To build a fresh zip locally, run `npm run build:zip`. The artifact is written to `dist/cheapest-read-<version>.zip` and contains only the runtime files (`manifest.json`, `background.js`, `content.js`, `offers-content.js`, `popup.html`, `popup.js`).
+To build a fresh zip locally, run `npm run build:zip`. The artifact is written to `dist/cheapest-read-<version>.zip` and contains only the runtime files from `src/` (`manifest.json`, `background.js`, `content.js`, `offers-content.js`, `popup.html`, `popup.js`, and `icons/`).
