@@ -83,4 +83,4 @@ Cheapest Read opens one background tab per book and waits for that book's offer 
 ## Related docs
 
 - [INSTALLATION.md](INSTALLATION.md) — installing and updating the extension in dev mode.
-- [README.md](README.md) — product scope and current limitations.
+- [README.md](../README.md) — product scope and current limitations.

@@ -18,24 +18,24 @@ Chrome extension that scans your Amazon wishlist and surfaces the **lowest total
 
 ## Known issues
 
-- **The popup is currently broken.** Clicking the extension icon hits an archived page. Tracked as `FIS-33` (popup P0). See [INSTALLATION.md](INSTALLATION.md) for the temporary workaround.
+- **The popup is currently broken.** Clicking the extension icon hits an archived page. Tracked as `FIS-33` (popup P0). See [docs/INSTALLATION.md](docs/INSTALLATION.md) for the temporary workaround.
 - Seller extraction, condition extraction, and duplicate-offer dedup are partial. Tracked in the FIS-23 roadmap.
 
 ## Install
 
-See [INSTALLATION.md](INSTALLATION.md).
+See [docs/INSTALLATION.md](docs/INSTALLATION.md).
 
 ## Use
 
-See [HOWTO-CHEAPEST-COPY.md](HOWTO-CHEAPEST-COPY.md) for the end-user walkthrough: opening your wishlist, reading the inline result boxes, and troubleshooting common failure modes.
+See [docs/HOWTO-CHEAPEST-COPY.md](docs/HOWTO-CHEAPEST-COPY.md) for the end-user walkthrough: opening your wishlist, reading the inline result boxes, and troubleshooting common failure modes.
 
 ## Develop
 
-See [DEVELOPMENT.md](DEVELOPMENT.md) for the dev workflow and project layout. Deep technical notes on the offers endpoint, DOM selectors, and extraction recipe live in [claudedocs/](claudedocs/README.md).
+See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) for the dev workflow. The extension source lives in [`src/`](src/); see [docs/PROJECT-STRUCTURE.md](docs/PROJECT-STRUCTURE.md) for the full repo layout. Deep technical notes on the offers endpoint, DOM selectors, and extraction recipe live in [docs/claudedocs/](docs/claudedocs/README.md).
 
 ## Contributing / Release
 
-See [RELEASE-WORKFLOW.md](RELEASE-WORKFLOW.md) for the canonical chain from PR to verified release (owners, prereqs, and skip-paths for hotfixes / non-release / doc-only PRs).
+See [docs/RELEASE-WORKFLOW.md](docs/RELEASE-WORKFLOW.md) for the canonical chain from PR to verified release (owners, prereqs, and skip-paths for hotfixes / non-release / doc-only PRs).
 
 ## Roadmap
 

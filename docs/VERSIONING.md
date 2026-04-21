@@ -1,12 +1,12 @@
 # Versioning
 
-Cheapest Read follows [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.html): `MAJOR.MINOR.PATCH`. This doc covers the **versioning policy** — how to pick the next number and how to update the record in the same PR. For the process side (who reviews, who merges, who cuts the release), see [`RELEASE-WORKFLOW.md`](../RELEASE-WORKFLOW.md).
+Cheapest Read follows [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.html): `MAJOR.MINOR.PATCH`. This doc covers the **versioning policy** — how to pick the next number and how to update the record in the same PR. For the process side (who reviews, who merges, who cuts the release), see [`RELEASE-WORKFLOW.md`](./RELEASE-WORKFLOW.md).
 
 ## Source of truth
 
-- **`manifest.json` → `version`** is authoritative. Chrome reads this; it is what users see.
+- **`src/manifest.json` → `version`** is authoritative. Chrome reads this; it is what users see.
 - **`package.json` → `version`** is not authoritative. It exists for npm tooling and is not kept in sync. Do not rely on it.
-- **Git tags** mirror `manifest.json`. Tag format: `vMAJOR.MINOR.PATCH` (e.g. `v1.4.0`). The tag MUST match `manifest.json` exactly at the commit it points to. If the working copy shows one version and the tag shows another, `manifest.json` wins and the tag is wrong.
+- **Git tags** mirror `src/manifest.json`. Tag format: `vMAJOR.MINOR.PATCH` (e.g. `v1.4.0`). The tag MUST match `src/manifest.json` exactly at the commit it points to. If the working copy shows one version and the tag shows another, `src/manifest.json` wins and the tag is wrong.
 
 ## Bump rules
 
@@ -20,7 +20,7 @@ If a change could reasonably be either MINOR or PATCH, prefer PATCH. If it could
 
 ## Deciding the next version
 
-Read the entries under `[Unreleased]` in [`CHANGELOG.md`](../CHANGELOG.md):
+Read the entries under `[Unreleased]` in [`CHANGELOG.md`](./CHANGELOG.md):
 
 - Any `Removed` entry, or any `Changed` entry that is breaking → bump **MAJOR**.
 - Otherwise, any `Added` entry → bump **MINOR**.
@@ -34,12 +34,12 @@ Worked example: if `[Unreleased]` contains two `Added` entries (a new filter, a 
 
 Every PR that ships behavior to users should:
 
-1. Update `manifest.json` `version` using the bump rules above.
-2. Update [`CHANGELOG.md`](../CHANGELOG.md) in the same PR:
+1. Update `src/manifest.json` `version` using the bump rules above.
+2. Update [`CHANGELOG.md`](./CHANGELOG.md) in the same PR:
    - Move relevant entries out of `[Unreleased]` into a new `[MAJOR.MINOR.PATCH] - YYYY-MM-DD` section.
    - Group entries under `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, or `Security` (see [Keep a Changelog](https://keepachangelog.com/en/1.1.0/#how)).
    - Add the new version to the compare/tag link list at the bottom of the file once the tag is pushed.
-3. Merge the PR via the release chain in [`RELEASE-WORKFLOW.md`](../RELEASE-WORKFLOW.md).
+3. Merge the PR via the release chain in [`RELEASE-WORKFLOW.md`](./RELEASE-WORKFLOW.md).
 4. After merge to `main`, tag the merge commit:
    ```
    git tag -a vMAJOR.MINOR.PATCH -m "Cheapest Read vMAJOR.MINOR.PATCH"
@@ -51,7 +51,7 @@ PRs that do not ship user-visible behavior (CI-only changes, non-shipping docs, 
 
 ## Current state — pre-Web-Store
 
-The repo has never had a public release. `manifest.json` was imported carrying `1.3` (no tag), then bumped to `1.4.0` (tag `v1.4.0`) when FIS-40's dev-mode build script landed. Until [FIS-58](https://github.com/jamesfishwick/amazon-used/issues/58) (Chrome Web Store listing) ships, users install the unpacked build themselves and the only consumers of the `version` field are dev-mode reviewers.
+The repo has never had a public release. `src/manifest.json` was imported carrying `1.3` (no tag), then bumped to `1.4.0` (tag `v1.4.0`) when FIS-40's dev-mode build script landed. Until [FIS-58](https://github.com/jamesfishwick/amazon-used/issues/58) (Chrome Web Store listing) ships, users install the unpacked build themselves and the only consumers of the `version` field are dev-mode reviewers.
 
 Practical effect: **the cost of a MAJOR bump is low**, because nothing external depends on the current major. Do not soften the bump rules to avoid a MAJOR; if the change is breaking, bump MAJOR and write it down. When the Web Store listing ships, whatever version is live at that moment becomes the stable baseline.
 

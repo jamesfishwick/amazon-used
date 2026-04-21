@@ -3,7 +3,7 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
-VERSION=$(node -p "require('./manifest.json').version")
+VERSION=$(node -p "require('./src/manifest.json').version")
 OUT_DIR="dist"
 ZIP_NAME="cheapest-read-${VERSION}.zip"
 
@@ -28,16 +28,20 @@ ICON_FILES=(
 )
 
 for f in "${RUNTIME_FILES[@]}" "${ICON_FILES[@]}"; do
-  if [[ ! -f "$f" ]]; then
-    echo "build-zip: missing required file '$f'" >&2
+  if [[ ! -f "src/$f" ]]; then
+    echo "build-zip: missing required file 'src/$f'" >&2
     exit 1
   fi
 done
 
 mkdir -p "$OUT_DIR"
-rm -f "$OUT_DIR/$ZIP_NAME"
+OUT_ABS="$(pwd)/$OUT_DIR/$ZIP_NAME"
+rm -f "$OUT_ABS"
 
-zip -q -r "$OUT_DIR/$ZIP_NAME" "${RUNTIME_FILES[@]}" "${RUNTIME_DIRS[@]}" -x 'icons/*.svg' 'icons/icon-128-store.png'
+(
+  cd src
+  zip -q -r "$OUT_ABS" "${RUNTIME_FILES[@]}" "${RUNTIME_DIRS[@]}" -x 'icons/*.svg' 'icons/icon-128-store.png'
+)
 
 echo "built $OUT_DIR/$ZIP_NAME"
 unzip -l "$OUT_DIR/$ZIP_NAME"

@@ -4,11 +4,14 @@ Guide for working on Cheapest Read locally. Scope is **books on amazon.com**; mu
 
 ## Key files
 
-- `manifest.json` — MV3 extension configuration (name, permissions, content scripts, popup).
-- `popup.html` / `popup.js` — Extension popup entry point. **Currently broken** — see `FIS-33`. Do not add new features here until that ticket closes.
-- `content.js` — Wishlist page scanner. Reads ASINs, triggers per-item offer fetches, renders results.
-- `background.js` — Service worker. Coordinates the tab-based offer-fetch flow.
-- `offers-content.js` — Runs in the offer-listing tabs, extracts offers from the `aodAjaxMain` response.
+All extension source lives under [`src/`](../src/). Chrome's extension root is `src/` — when loading unpacked, select that directory.
+
+- `src/manifest.json` — MV3 extension configuration (name, permissions, content scripts, popup).
+- `src/popup.html` / `src/popup.js` — Extension popup entry point. **Currently broken** — see `FIS-33`. Do not add new features here until that ticket closes.
+- `src/content.js` — Wishlist page scanner. Reads ASINs, triggers per-item offer fetches, renders results.
+- `src/background.js` — Service worker. Coordinates the tab-based offer-fetch flow.
+- `src/offers-content.js` — Runs in the offer-listing tabs, extracts offers from the `aodAjaxMain` response.
+- `src/icons/` — Extension icons referenced by `manifest.json`.
 
 `window.html` and `window.js` are archived in `archive/` and must not be referenced from shipping code.
 
@@ -23,7 +26,7 @@ For the detailed file inventory see [PROJECT-STRUCTURE.md](PROJECT-STRUCTURE.md)
 
 ## Dev workflow
 
-1. Edit files in the repo root.
+1. Edit files under `src/`.
 2. Reload the extension at `chrome://extensions/`.
 3. Reload the target `amazon.com/hz/wishlist/*` tab.
 4. Click the extension icon to trigger a scan.
@@ -42,7 +45,7 @@ shellcheck is required in CI and recommended locally (`brew install shellcheck`)
 
 ## Testing
 
-The `tests/` directory contains standalone Node/Playwright scripts used for manual and ad-hoc validation. See [tests/README.md](tests/README.md) for the active vs. archived scripts. A unified `npm test` harness is on the roadmap and tracked in the FIS-23 plan.
+The `tests/` directory contains standalone Node/Playwright scripts used for manual and ad-hoc validation. See [../tests/README.md](../tests/README.md) for the active vs. archived scripts. A unified `npm test` harness is on the roadmap and tracked in the FIS-23 plan.
 
 Headless Playwright is preferred when driving the browser from scripts.
 
