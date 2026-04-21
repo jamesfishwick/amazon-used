@@ -1,148 +1,157 @@
 // Background script for Cheapest Read
-// Uses tab-based approach to properly wait for all-offers-display to populate
+// Tab-based offer fetch wrapped in an exponential-backoff retry loop.
+// Retry policy lives in offer-retry.js (see FIS-108).
 
-// Function to extract price from text
+importScripts("offer-retry.js");
+
+const DEBUG_MODE = true;
+const TAB_FETCH_TIMEOUT_MS = 30000;
+const POST_LOAD_SETTLE_MS = 3000;
+
 function _extractPrice(priceText) {
   if (!priceText) return null;
   const match = priceText.match(/\$?(\d+\.?\d*)/);
   return match ? parseFloat(match[1]) : null;
 }
 
-// Function to fetch all prices using tab-based approach with content script
-async function fetchAllPrices(asin, productType = "unknown", currentFormat = null) {
-  try {
-    console.log(
-      `\n🔍 ANALYZING: "${asin}" (${productType}${currentFormat ? ` - ${currentFormat}` : ""})`,
-    );
+// Single attempt at fetching offers for an ASIN. Returns
+//   { ok: true, value: offers[] } on success, or
+//   { ok: false, reason } when the tab layer reports a transient failure.
+// Never throws — all failure surfaces are normalized to { ok: false, reason }.
+function fetchOffersOnce(asin, productType, currentFormat) {
+  const offersUrl = `https://www.amazon.com/dp/${asin}/ref=olp-opf-redir?aod=1&ie=UTF8&condition=ALL`;
 
-    const offersUrl = `https://www.amazon.com/dp/${asin}/ref=olp-opf-redir?aod=1&ie=UTF8&condition=ALL`;
+  return new Promise((resolve) => {
+    let settled = false;
+    let tabId = null;
+    let timeoutId = null;
+    let onUpdated = null;
 
-    console.log(`🔗 OPENING TAB: ${offersUrl}`);
-    console.log(`🌐 VERIFICATION URL: ${offersUrl}`);
+    const cleanup = () => {
+      if (timeoutId) clearTimeout(timeoutId);
+      if (onUpdated) chrome.tabs.onUpdated.removeListener(onUpdated);
+      if (tabId !== null) chrome.tabs.remove(tabId).catch(() => {});
+    };
 
-    // Create a new tab to load the offers page
-    const tab = await chrome.tabs.create({
-      url: offersUrl,
-      active: false, // Don't switch to this tab
-    });
+    const done = (result) => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      resolve(result);
+    };
 
-    console.log(`✅ TAB CREATED: ${tab.id} for ${asin}`);
+    chrome.tabs
+      .create({ url: offersUrl, active: false })
+      .then((tab) => {
+        tabId = tab.id;
+        if (DEBUG_MODE) console.log(`TAB CREATED: ${tab.id} for ${asin}`);
 
-    return new Promise((resolve) => {
-      const timeoutId = setTimeout(() => {
-        console.log(`⏰ TIMEOUT: Closing tab ${tab.id}`);
-        chrome.tabs.remove(tab.id).catch(() => {});
-        resolve([]);
-      }, 30000); // 30 second timeout
+        timeoutId = setTimeout(() => {
+          done({ ok: false, reason: "timeout" });
+        }, TAB_FETCH_TIMEOUT_MS);
 
-      // Wait for tab to complete loading
-      const onUpdated = (tabId, changeInfo, _updatedTab) => {
-        if (tabId === tab.id && changeInfo.status === "complete") {
-          console.log(`✅ TAB LOADED: ${tab.id} for ${asin}`);
+        onUpdated = (updatedTabId, changeInfo) => {
+          if (updatedTabId !== tab.id) return;
+          if (changeInfo.status !== "complete") return;
 
-          // Give it a moment for JavaScript to run
+          // Give scripts a moment to run before we ask for offers.
           setTimeout(() => {
-            console.log(`📤 SENDING MESSAGE to tab ${tab.id} for ${asin}`);
-
-            // Send message to content script to extract offers
             chrome.tabs
               .sendMessage(tab.id, {
                 action: "extractOffers",
-                productType: productType,
-                currentFormat: currentFormat,
+                productType,
+                currentFormat,
               })
               .then((response) => {
-                clearTimeout(timeoutId);
-                chrome.tabs.onUpdated.removeListener(onUpdated);
-
-                if (response?.success) {
-                  console.log(`✅ OFFERS EXTRACTED for ${asin}: ${response.offers.length} offers`);
-                  if (response.offers.length > 0) {
-                    console.log(
-                      `💰 LOWEST for ${asin}: $${response.offers[0].price} (${response.offers[0].type})`,
-                    );
-                  }
-                  console.log(`────────────────────────────────────────────────────────────\n`);
-                  resolve(response.offers);
-                } else {
-                  console.log(
-                    `❌ EXTRACTION FAILED for ${asin}: ${response ? response.error : "No response"}`,
-                  );
-                  resolve([]);
+                if (!response) {
+                  done({ ok: false, reason: "message-error: no response" });
+                  return;
                 }
-
-                // Close the tab
-                console.log(`🗑️ CLOSING TAB: ${tab.id}`);
-                chrome.tabs.remove(tab.id).catch(() => {});
+                if (response.success === false) {
+                  const reasonDetail = response.reason || response.error || "unknown";
+                  done({ ok: false, reason: `extract-failed: ${reasonDetail}` });
+                  return;
+                }
+                done({ ok: true, value: response.offers || [] });
               })
               .catch((error) => {
-                clearTimeout(timeoutId);
-                chrome.tabs.onUpdated.removeListener(onUpdated);
-                console.error(`❌ MESSAGE ERROR for ${asin}: ${error.message}`);
-                console.log(`🗑️ CLOSING TAB (error): ${tab.id}`);
-                chrome.tabs.remove(tab.id).catch(() => {});
-                resolve([]);
+                const msg = error?.message ? error.message : String(error);
+                done({ ok: false, reason: `message-error: ${msg}` });
               });
-          }, 3000); // Wait 3 seconds for page to settle (increased from 2)
-        }
-      };
+          }, POST_LOAD_SETTLE_MS);
+        };
 
-      chrome.tabs.onUpdated.addListener(onUpdated);
-    });
-  } catch (error) {
-    console.error(`❌ Error fetching prices for ${asin}:`, error);
-    return [];
-  }
+        chrome.tabs.onUpdated.addListener(onUpdated);
+      })
+      .catch((error) => {
+        const msg = error?.message ? error.message : String(error);
+        done({ ok: false, reason: `tab-create-failed: ${msg}` });
+      });
+  });
 }
 
-// Listen for messages from content script
+// Retry-wrapped offer fetch. Returns a structured result so callers can
+// render a failure affordance instead of silently dropping the ASIN.
+async function fetchAllPrices(asin, productType = "unknown", currentFormat = null) {
+  if (DEBUG_MODE) {
+    console.log(
+      `\nANALYZING: "${asin}" (${productType}${currentFormat ? ` - ${currentFormat}` : ""})`,
+    );
+  }
+
+  const result = await self.OfferRetry.retryWithBackoff(
+    () => fetchOffersOnce(asin, productType, currentFormat),
+    { asin, debug: DEBUG_MODE },
+  );
+
+  if (DEBUG_MODE) {
+    if (result.ok) {
+      console.log(
+        `OFFERS for ${asin}: ${result.value.length} offers (attempts=${result.attempts})`,
+      );
+    } else {
+      console.log(`FETCH FAILED for ${asin} after ${result.attempts} attempts: ${result.reason}`);
+    }
+  }
+
+  return result;
+}
+
 chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
   if (request.action === "fetchPrices") {
-    console.log(`🔄 BACKGROUND: Received fetchPrices request for ${request.asin}`);
-
-    // Set a timeout to prevent the message channel from closing
-    const timeoutId = setTimeout(() => {
-      console.error(`⏰ BACKGROUND: Timeout fetching prices for ${request.asin}`);
-      try {
-        sendResponse({ success: false, error: "Request timeout" });
-      } catch (e) {
-        console.warn(`⚠️ BACKGROUND: Could not send timeout response: ${e.message}`);
-      }
-    }, 45000); // 45 second timeout (longer for tab approach)
-
     fetchAllPrices(request.asin, request.productType, request.currentFormat)
-      .then((prices) => {
-        clearTimeout(timeoutId);
-        console.log(`✅ BACKGROUND: Sending ${prices.length} prices for ${request.asin}`);
+      .then((result) => {
         try {
-          sendResponse({ success: true, prices });
+          if (result.ok) {
+            sendResponse({ success: true, prices: result.value, attempts: result.attempts });
+          } else {
+            sendResponse({ success: false, reason: result.reason, attempts: result.attempts });
+          }
         } catch (e) {
-          console.warn(`⚠️ BACKGROUND: Could not send success response: ${e.message}`);
+          console.warn(`BACKGROUND: sendResponse failed: ${e.message}`);
         }
       })
       .catch((error) => {
-        clearTimeout(timeoutId);
-        console.error(`❌ BACKGROUND: Error in fetchAllPrices for ${request.asin}:`, error);
+        console.error(`BACKGROUND: unexpected error for ${request.asin}:`, error);
         try {
-          sendResponse({ success: false, error: error.message });
+          sendResponse({ success: false, reason: `threw: ${error.message}`, attempts: 0 });
         } catch (e) {
-          console.warn(`⚠️ BACKGROUND: Could not send error response: ${e.message}`);
+          console.warn(`BACKGROUND: sendResponse failed: ${e.message}`);
         }
       });
-    return true; // Keep message channel open for async response
+    return true;
   }
 
-  // Handle other legacy messages
   if (request.action === "updateProgress") {
     chrome.runtime.sendMessage(request);
     return true;
   }
 
   if (request.action === "checkProduct") {
-    // Legacy support - redirect to new fetchPrices
     fetchAllPrices(request.asin, request.productType || "unknown", request.currentFormat)
-      .then((prices) => {
-        const result =
+      .then((result) => {
+        const prices = result.ok ? result.value : [];
+        const response =
           prices.length > 0
             ? {
                 hasUsed: prices.some((p) => p.type === "Used"),
@@ -150,7 +159,7 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
                 prices,
               }
             : null;
-        sendResponse(result);
+        sendResponse(response);
       })
       .catch((error) => {
         console.error("Error checking product:", error);

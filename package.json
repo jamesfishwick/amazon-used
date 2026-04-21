@@ -4,7 +4,7 @@
   "description": "Cheapest Read — Chrome extension that scans your Amazon wishlist and surfaces the lowest total price (item + shipping) across new and used offers for every book on the list.",
   "main": "manifest.json",
   "scripts": {
-    "test": "node tests/happy-path.spec.js && node tests/render-label.spec.js",
+    "test": "node tests/happy-path.spec.js && node tests/render-label.spec.js && node tests/retry-backoff.spec.js",
     "build:zip": "bash scripts/build-zip.sh",
     "prepare": "husky",
     "lint": "biome check",

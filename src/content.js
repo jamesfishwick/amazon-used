@@ -69,16 +69,16 @@ function isExtensionContextValid() {
   }
 }
 
-// Function to fetch all prices for an item using background script
+// Ask the background script to fetch offers for an ASIN. Returns a structured
+// result so the caller can render a retry affordance on exhaustion instead of
+// silently dropping the item from the list.
 async function fetchAllPrices(asin, _title, productType = "unknown", currentFormat = null) {
   try {
-    // Check if extension context is still valid
     if (!isExtensionContextValid()) {
       console.warn(`Extension context invalidated for ${asin} - skipping price check`);
-      return [];
+      return { ok: false, reason: "extension-invalidated" };
     }
 
-    // Send message to background script to fetch prices
     const response = await chrome.runtime.sendMessage({
       action: "fetchPrices",
       asin: asin,
@@ -88,22 +88,31 @@ async function fetchAllPrices(asin, _title, productType = "unknown", currentForm
 
     if (response?.success) {
       if (DEBUG_MODE) {
-        console.log(`Background script returned ${response.prices.length} prices for ${asin}`);
+        console.log(
+          `Background returned ${response.prices.length} prices for ${asin} in ${response.attempts} attempt(s)`,
+        );
       }
-      return response.prices;
-    } else {
-      console.error(`Background script failed to fetch prices for ${asin}:`, response?.error);
-      return [];
+      return { ok: true, prices: response.prices, attempts: response.attempts };
     }
+    if (DEBUG_MODE) {
+      console.warn(
+        `Background reported failure for ${asin} after ${response?.attempts ?? "?"} attempt(s):`,
+        response?.reason || response?.error,
+      );
+    }
+    return {
+      ok: false,
+      reason: response?.reason || response?.error || "unknown",
+      attempts: response?.attempts,
+    };
   } catch (error) {
     if (error.message.includes("Extension context invalidated")) {
       console.warn(`Extension was reloaded - stopping price checks. Please refresh the page.`);
-      // Show user-friendly message
       showExtensionReloadedMessage();
-      return [];
+      return { ok: false, reason: "extension-invalidated" };
     }
     console.error(`Error communicating with background script for ${asin}:`, error);
-    return [];
+    return { ok: false, reason: `threw: ${error.message}` };
   }
 }
 
@@ -241,6 +250,61 @@ function displayPriceInfo(
   }
 }
 
+// Render the "offer fetch failed — retry" affordance for an ASIN whose retries
+// all exhausted. Clicking Retry removes the ASIN from the processed set and
+// re-runs the item through the normal pipeline.
+function displayPriceFailure(item, reason, asin, _productType, _currentFormat) {
+  const existingDisplay = item.querySelector(".amz-price-checker-display");
+  if (existingDisplay) existingDisplay.remove();
+
+  const display = document.createElement("div");
+  display.className = "amz-price-checker-display amz-price-checker-failure";
+  display.style.cssText = `
+    margin: 10px 0;
+    padding: 10px;
+    background: #FDECEA;
+    border: 1px solid #D93025;
+    border-radius: 4px;
+    font-size: 14px;
+  `;
+
+  const reasonLabel = typeof reason === "string" && reason ? reason : "unknown";
+  display.innerHTML = `
+    <div style="font-weight: bold; color: #B71C1C; margin-bottom: 4px;">
+      Offer fetch failed — retry
+    </div>
+    <div style="font-size: 12px; color: #5F6368; margin-bottom: 6px;">
+      ASIN ${asin} — reason: ${reasonLabel}
+    </div>
+    <button type="button" class="amz-price-checker-retry" style="
+      padding: 4px 10px;
+      font-size: 12px;
+      border: 1px solid #D93025;
+      background: #fff;
+      color: #B71C1C;
+      cursor: pointer;
+      border-radius: 3px;
+    ">Retry</button>
+  `;
+
+  const retryButton = display.querySelector(".amz-price-checker-retry");
+  retryButton.addEventListener("click", () => {
+    retryButton.disabled = true;
+    retryButton.textContent = "Retrying...";
+    processedASINs.delete(asin);
+    processWishlistItem(item).catch((error) => {
+      console.error(`Retry failed for ${asin}:`, error);
+    });
+  });
+
+  const priceSection = item.querySelector(".a-row.a-size-small.itemPriceDrop, .a-row.a-size-small");
+  if (priceSection) {
+    priceSection.parentNode.insertBefore(display, priceSection.nextSibling);
+  } else {
+    item.appendChild(display);
+  }
+}
+
 // Detect book items on the wishlist. Non-book items return productType !== 'book'
 // so the caller can skip them. Cheapest Read is books-only on amazon.com.
 function analyzeWishlistItem(item) {
@@ -334,16 +398,17 @@ async function processWishlistItem(item) {
   // Show loading state
   displayPriceInfo(item, [], true, asin, productType, currentFormat);
 
-  // Fetch prices with format filtering
-  const prices = await fetchAllPrices(asin, title, productType, currentFormat);
+  const result = await fetchAllPrices(asin, title, productType, currentFormat);
 
-  // Display results (only if we got valid results or context is still valid)
-  if (isExtensionContextValid()) {
-    displayPriceInfo(item, prices, false, asin, productType, currentFormat);
+  if (!isExtensionContextValid()) return;
 
-    if (DEBUG_MODE && prices.length > 0) {
-      console.log(`Found ${prices.length} prices for "${title}":`, prices);
+  if (result.ok) {
+    displayPriceInfo(item, result.prices, false, asin, productType, currentFormat);
+    if (DEBUG_MODE && result.prices.length > 0) {
+      console.log(`Found ${result.prices.length} prices for "${title}":`, result.prices);
     }
+  } else {
+    displayPriceFailure(item, result.reason, asin, productType, currentFormat);
   }
 }
 
